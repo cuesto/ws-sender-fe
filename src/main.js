@@ -5,7 +5,7 @@ import store from './store'
 import vuetify from './plugins/vuetify';
 import { auth } from './firebase'
 
-Vue.config.productionTip = true
+Vue.config.productionTip = false
 
 let app
 auth.onAuthStateChanged(() => {
