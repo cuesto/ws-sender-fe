@@ -1,3 +1,5 @@
+![Node.js CI](https://github.com/cuesto/ims-vue/workflows/Node.js%20CI/badge.svg?branch=development)
+![DEPLOY TO FIREBASE](https://github.com/cuesto/ims-vue/workflows/DEPLOY%20TO%20FIREBASE/badge.svg)
 # ims-vue
 
 ## Project setup
