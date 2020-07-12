@@ -14,6 +14,7 @@ jobs:
           with:
             node-version: '12'
             check-latest: true
+        - name: Installing project dependencies    
         - run: npm install
         - run: npm build
     #   uses: w9jds/firebase-action@master
