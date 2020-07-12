@@ -16,7 +16,8 @@ jobs:
             check-latest: true
         - name: Installing project dependencies    
           run: npm install
-        - run: npm build
+        - name: Building the project
+          run: npm build
     #   uses: w9jds/firebase-action@master
     #     with:
     #       args: deploy --only hosting
