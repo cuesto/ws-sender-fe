@@ -1,4 +1,4 @@
-name: DEPLOY TO STAGING
+name: DEPLOY TO FIREBASE
 
 on:
   push:
