@@ -3,7 +3,7 @@ name: DEPLOY TO FIREBASE
 on:
   push:
     branches:
-      - development
+      - master
 
 jobs:
   firebase-deploy:
