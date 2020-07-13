@@ -13,6 +13,7 @@ jobs:
         uses: actions/checkout@master
       - name: Install Dependencies
         run: npm install
+        run: npm install -g firebase-tools
       - name: Build
         run: npm run build
       - name: Archive Production Artifact
