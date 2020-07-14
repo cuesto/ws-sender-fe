@@ -1,5 +1,5 @@
-![Node.js CI](https://github.com/cuesto/ims-vue/workflows/Node.js%20CI/badge.svg?branch=development)
-![DEPLOY TO FIREBASE](https://github.com/cuesto/ims-vue/workflows/DEPLOY%20TO%20FIREBASE/badge.svg)
+![Node Continuous Integration](https://github.com/cuesto/ims-vue/workflows/Node%20Continuous%20Integration/badge.svg)
+![Firebase Continuous Deployment](https://github.com/cuesto/ims-vue/workflows/Firebase%20Continuous%20Deployment/badge.svg)
 # ims-vue
 
 ## Project setup
