@@ -5,6 +5,7 @@
         <v-container>
           <h1>In Development</h1>
           <h2>CI / CD Done</h2>
+          <v-icon>mdi-home</v-icon>
         </v-container>
       </v-card>
     </v-flex>

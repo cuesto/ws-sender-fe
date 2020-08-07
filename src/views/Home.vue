@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import Home from '../components/Home';
+import Home from '../components/HomeComponent';
 
 export default {
   components: {
