@@ -1,7 +1,14 @@
 <template>
   <v-layout align-start>
     <v-flex>
-      <v-data-table :headers="headers" :items="items" sort-by="location" class="elevation-1">
+      <v-data-table
+        :headers="headers"
+        :items="items"
+        sort-by="location"
+        class="elevation-1"
+        :items-per-page="10"
+        :footer-props="{'items-per-page-options': [10, 15, 20, 25]  }"
+      >
         <template v-slot:top>
           <v-toolbar flat color="white">
             <v-toolbar-title>Conteo de Inventario</v-toolbar-title>
@@ -14,21 +21,16 @@
               label="Paquete"
               single-line
               hide-details
+              v-on:keyup="validateKeyPressed"
             ></v-text-field>
             <v-spacer></v-spacer>
-            <v-btn style="margin-right: 10px" @click="addSku" color="blue" dark>
-              <v-icon left dark>mdi-barcode</v-icon>Cargar
-            </v-btn>
+            <v-chip class="ma-2" color="green" outlined>
+              Ubicación :
+              <b>{{location}}</b>
+            </v-chip>
           </v-toolbar>
         </template>
         <template v-slot:item.options="{ item }">
-          <v-icon
-            size="sm"
-            variant="outline-info"
-            color="blue"
-            class="mr-1"
-            @click="editItem(item)"
-          >mdi-pencil</v-icon>
           <v-icon size="sm" color="red" class="mr-1" @click="deleteItem(item)">mdi-delete</v-icon>
         </template>
       </v-data-table>
@@ -52,14 +54,39 @@ export default {
   mounted() {},
 
   methods: {
+    displayNotification(type, message) {
+      this.$swal.fire({
+        position: "top-end",
+        type: type,
+        title: message,
+        showConfirmButton: false,
+        timer: 1000,
+      });
+    },
+    validateKeyPressed(e) {
+      if (e.keyCode === 13) {
+        this.addSku();
+      }
+    },
+
     addSku() {
       let firstLetter = this.sku.charAt(0);
+
+      if (
+        this.items.length == 0 &&
+        firstLetter != "." &&
+        this.location === ""
+      ) {
+        this.displayNotification("error", "Especifique Ubicación.");
+        this.cleanSku();
+        return;
+      }
 
       if (this.items.length == 0 && firstLetter === ".") {
         this.location = this.sku;
         this.cleanSku();
         return;
-      } 
+      }
 
       if (this.items.length > 0 && firstLetter === ".") {
         this.location = this.sku;
@@ -69,7 +96,6 @@ export default {
 
       this.items.push({ sku: this.sku, location: this.location });
       this.cleanSku();
-      console.table(this.items);
     },
 
     cleanSku() {
