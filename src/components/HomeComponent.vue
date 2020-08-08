@@ -54,15 +54,15 @@ export default {
   mounted() {},
 
   methods: {
-    displayNotification(type, message) {
-      this.$swal.fire({
-        position: "top-end",
-        type: type,
-        title: message,
-        showConfirmButton: false,
-        timer: 1000,
-      });
-    },
+    // displayNotification(type, message) {
+    //   this.$swal.fire({
+    //     position: "top-end",
+    //     type: type,
+    //     title: message,
+    //     showConfirmButton: false,
+    //     timer: 1000,
+    //   });
+    // },
     validateKeyPressed(e) {
       if (e.keyCode === 13) {
         this.addSku();
@@ -77,7 +77,8 @@ export default {
         firstLetter != "." &&
         this.location === ""
       ) {
-        this.displayNotification("error", "Especifique Ubicación.");
+        alert("Específique ubicación");
+        //this.displayNotification("error", "Especifique Ubicación.");
         this.cleanSku();
         return;
       }
