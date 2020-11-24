@@ -151,7 +151,7 @@ export default {
           }
 
           me.uploadModal = false;
-          //alert("Se cargaron los registros correctamente.");
+          alert("Se cargaron los registros correctamente.");
 
           inventoryItemList.forEach(a => {
             me.items.push({ sku: a.sku, location: a.location });
