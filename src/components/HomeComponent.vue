@@ -6,19 +6,19 @@
         :items="items"
         sort-by="location"
         class="elevation-1"
-        :items-per-page="10"
-        :footer-props="{ 'items-per-page-options': [10, 15, 20, 25] }"
+        :items-per-page="50"
+        :footer-props="{ 'items-per-page-options': [50, 100, 250, 500] }"
       >
         <template v-slot:top>
           <v-toolbar flat color="white">
             <v-toolbar-title>Conteo de Inventario</v-toolbar-title>
             <v-divider class="mx-4" inset vertical></v-divider>
             <v-btn
-              :loading="loading"
-              :disabled="loading"
+              :loading="loadingUploadBtn"
+              :disabled="loadingUploadBtn"
               color="green"
               class="ma-2 white--text"
-              @click="loader = 'loading'"
+              @click="showUploadModal"
             >
               Cargar
               <v-icon right dark> mdi-cloud-upload </v-icon>
@@ -47,11 +47,31 @@
         </template>
       </v-data-table>
     </v-flex>
+    <v-dialog v-model="uploadModal" max-width="500px">
+      <v-card>
+        <v-card-text>
+          <template>
+            <v-file-input
+              v-model="file"
+              accept="file/*.csv"
+              label="Cargar Plantilla"
+            ></v-file-input>
+            <v-btn @click="UploadInventoryItems()" color="blue" dark>
+              <v-icon left>mdi-cloud-upload</v-icon>Cargar
+            </v-btn>
+            <v-btn @click="hideUploadModal()" color="blue darken-1" text
+              >Cancelar</v-btn
+            >
+          </template>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-layout>
 </template>
 
 <script>
 import Papa from "papaparse";
+import InventoryItemModel from "../models/InventoryItemModel";
 
 export default {
   components: {},
@@ -64,19 +84,14 @@ export default {
     items: [],
     sku: "",
     location: "",
-    loader: null,
-    loading: false,
+
+    inventoryItemModel: new InventoryItemModel(),
+    loadingUploadBtn: false,
+    fileProcessed: null,
+    file: null,
+    uploadModal: false,
   }),
-  watch: {
-    loader() {
-      const l = this.loader;
-      this[l] = !this[l];
-
-      setTimeout(() => (this[l] = false), 3000);
-
-      this.loader = null;
-    },
-  },
+  watch: {},
   mounted() {},
 
   methods: {
@@ -93,6 +108,86 @@ export default {
       if (e.keyCode === 13) {
         this.addSku();
       }
+    },
+
+    UploadInventoryItems() {
+      if (this.file == null) {
+        alert("El archivo es de un formato incorrecto o no se ha cargado.");
+        // this.displayNotification(
+        //   "error",
+        //   "El archivo es de un formato incorrecto o no se ha cargado."
+        // );
+        return;
+      }
+
+      let me = this;
+
+      Papa.parse(this.file, {
+        header: true,
+        complete: function (results) {
+          me.fileProcessed = results.data;
+          var inventoryItemList = results.data.map((a) => {
+            return {
+              sku: a.SKU,
+              location: a.LOCATION,
+            };
+          });
+
+          inventoryItemList = inventoryItemList.filter(
+            (x) =>
+              x.sku != undefined &&
+              x.sku != "" &&
+              x.location != undefined &&
+              x.location != ""
+          );
+
+          //console.log(inventoryItemList);
+          if (inventoryItemList.length == 0) {
+            alert(
+              "No se pudo procesar el archivo, revise el formato o los datos."
+            );
+            //me.displayNotification("error", "No se pudo procesar el archivo, revise el formato.");
+            return;
+          }
+
+          me.uploadModal = false;
+          //alert("Se cargaron los registros correctamente.");
+
+          inventoryItemList.forEach(a => {
+            me.items.push({ sku: a.sku, location: a.location });
+          });
+          
+          // axios
+          //   .post(
+          //     "api/EmployeeRequests/PostEmployeeRequests",
+          //     inventoryItemtList
+          //   )
+          //   .then(function(response) {
+          //     if (response.data.result == "ERROR") {
+          //       me.displayNotification("error", response.data.message);
+          //     } else {
+          //  me.uploadModal = false;
+          //       me.getEmployeeRequests();
+          //       me.clean();
+          //       me.displayNotification(
+          //         "success",
+          //         "Se cargaron los registros correctamente."
+          //       );
+          //     }
+          //   })
+          //   .catch(function(error) {
+          //     me.displayNotification("error", error.message);
+          //   });
+        },
+      });
+    },
+
+    showUploadModal() {
+      this.uploadModal = true;
+    },
+    hideUploadModal() {
+      this.uploadModal = false;
+      this.file = null;
     },
 
     addSku() {
@@ -124,7 +219,6 @@ export default {
       this.items.push({ sku: this.sku, location: this.location });
       this.cleanSku();
     },
-
     cleanSku() {
       this.sku = "";
     },
