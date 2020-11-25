@@ -35,7 +35,7 @@
             ></v-text-field>
             <v-spacer></v-spacer>
             <v-chip class="ma-2" color="green" outlined>
-              Ubicación :
+              Ubicación-temp :
               <b>{{ location }}</b>
             </v-chip>
           </v-toolbar>
