@@ -1,6 +1,9 @@
 <template>
   <v-app id="inspire">
-    <v-navigation-drawer v-model="drawer" :clipped="$vuetify.breakpoint.lgAndUp"  app>
+    <v-navigation-drawer
+      v-model="drawer"
+      app
+    >
       <template>
         <v-list dense>
           <template >
@@ -15,19 +18,12 @@
       </template>
     </v-navigation-drawer>
 
-    <v-app-bar :clipped-left="$vuetify.breakpoint.lgAndUp" app color="blue darken-3" dark>
-      <v-toolbar-title style="width: 300px" class="ml-0 pl-4">
-        <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-        <span class="hidden-sm-and-down">Inventory Management</span>
-      </v-toolbar-title>
-      <v-spacer></v-spacer>
-      <!-- <v-btn @click="logout" v-if="logged" text>
-        <v-icon>logout</v-icon>Salir
-      </v-btn>
-      <v-btn :to="{name: 'login'}" v-else text>
-        <v-icon>apps</v-icon>Login
-      </v-btn> -->
+    <v-app-bar app>
+      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+
+      <v-toolbar-title>Inventory Management</v-toolbar-title>
     </v-app-bar>
+
     <v-main>
       <v-container fluid fill-height>
         <v-slide-y-transition mode="out-in">
@@ -47,30 +43,8 @@
   </v-app>
 </template>
 
-<style>
-body {
-  font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica, Arial,
-    sans-serif;
-}
-</style>
-
-
 <script>
-export default {
-  name: "App",
-  data: () => ({
-    //
-    drawer: null
-  }),
-  computed: {
-    
-  },
-  created() {
-    
-  },
-  methods: {
-    
+  export default {
+    data: () => ({ drawer: null }),
   }
-};
 </script>
