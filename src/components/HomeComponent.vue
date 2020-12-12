@@ -35,12 +35,13 @@
             ></v-text-field>
             <v-spacer></v-spacer>
             <v-chip class="ma-2" color="green" outlined>
-              Ubicación :
+              Ubicación-temp :
               <b>{{ location }}</b>
             </v-chip>
           </v-toolbar>
         </template>
-        <template v-slot:item.options="{ item }">
+        <template v-slot:[`item.actions`]="{ item }">
+        <!-- <template v-slot:item.options="{ item }"> -->
           <v-icon size="sm" color="red" class="mr-1" @click="deleteItem(item)"
             >mdi-delete</v-icon
           >
