@@ -2,7 +2,7 @@ name: Firebase Continuous Deployment
 
 on:
   push:
-    branches: [ development ]
+    branches: [ qa, master ]
 
 
 jobs:
