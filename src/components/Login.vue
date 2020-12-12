@@ -69,7 +69,7 @@
                   <v-btn color="primary" @click="signup">Registrar</v-btn>
 
                   <div class="extras">
-                    <a @click="toggleForm()">Back to Log In</a>
+                    <a @click="toggleForm()">Volver al LogIn</a>
                   </div>
                 </form>
               </div>
@@ -94,7 +94,7 @@ export default {
       email: "",
       password: "",
     },
-    showLoginForm: false,
+    showLoginForm: true,
     rules: {
       required: (value) => !!value || "Requerido.",
       email: (value) => {
@@ -106,6 +106,9 @@ export default {
   }),
   created() {},
   methods: {
+  toggleForm() {
+      this.showLoginForm = !this.showLoginForm
+    },
     async login() {
       this.$store.dispatch("login", {
         email: this.loginForm.email,

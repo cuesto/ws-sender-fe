@@ -15,13 +15,23 @@
             <v-divider class="mx-4" inset vertical></v-divider>
             <v-btn
               :loading="loadingUploadBtn"
-              :disabled="loadingUploadBtn"
+              :disabled="disableUploadBtn"
               color="green"
               class="ma-2 white--text"
               @click="showUploadModal"
             >
               Cargar
               <v-icon right dark> mdi-cloud-upload </v-icon>
+            </v-btn>
+            <v-btn
+              :loading="loadingDownloadBtn"
+              :disabled="disableDownloadBtn"
+              color="red"
+              class="ma-2 white--text"
+              @click="downloadString"
+            >
+              Descargar
+              <v-icon right dark> mdi-cloud-download </v-icon>
             </v-btn>
             <v-spacer></v-spacer>
             <v-text-field
@@ -35,13 +45,13 @@
             ></v-text-field>
             <v-spacer></v-spacer>
             <v-chip class="ma-2" color="green" outlined>
-              Ubicación-temp :
+              Ubicación : 
               <b>{{ location }}</b>
             </v-chip>
           </v-toolbar>
         </template>
         <template v-slot:[`item.actions`]="{ item }">
-        <!-- <template v-slot:item.options="{ item }"> -->
+          <!-- <template v-slot:item.options="{ item }"> -->
           <v-icon size="sm" color="red" class="mr-1" @click="deleteItem(item)"
             >mdi-delete</v-icon
           >
@@ -88,6 +98,9 @@ export default {
 
     inventoryItemModel: new InventoryItemModel(),
     loadingUploadBtn: false,
+    disableUploadBtn: true,
+    loadingDownloadBtn: false,
+    disableDownloadBtn: true,
     fileProcessed: null,
     file: null,
     uploadModal: false,
@@ -142,7 +155,6 @@ export default {
               x.location != ""
           );
 
-          //console.log(inventoryItemList);
           if (inventoryItemList.length == 0) {
             alert(
               "No se pudo procesar el archivo, revise el formato o los datos."
@@ -154,31 +166,9 @@ export default {
           me.uploadModal = false;
           alert("Se cargaron los registros correctamente.");
 
-          inventoryItemList.forEach(a => {
+          inventoryItemList.forEach((a) => {
             me.items.push({ sku: a.sku, location: a.location });
           });
-          
-          // axios
-          //   .post(
-          //     "api/EmployeeRequests/PostEmployeeRequests",
-          //     inventoryItemtList
-          //   )
-          //   .then(function(response) {
-          //     if (response.data.result == "ERROR") {
-          //       me.displayNotification("error", response.data.message);
-          //     } else {
-          //  me.uploadModal = false;
-          //       me.getEmployeeRequests();
-          //       me.clean();
-          //       me.displayNotification(
-          //         "success",
-          //         "Se cargaron los registros correctamente."
-          //       );
-          //     }
-          //   })
-          //   .catch(function(error) {
-          //     me.displayNotification("error", error.message);
-          //   });
         },
       });
     },
@@ -218,10 +208,54 @@ export default {
       }
 
       this.items.push({ sku: this.sku, location: this.location });
+
+      if (this.disableDownloadBtn) this.disableDownloadBtn = false;
+
       this.cleanSku();
     },
     cleanSku() {
       this.sku = "";
+    },
+
+    downloadString() {
+      let text = this.getInventoryItemFormatString();
+      let fileType = "text";
+      let fileName = "archivoinventario.txt";
+
+      var blob = new Blob([text], { type: fileType });
+      console.log(text);
+      var a = document.createElement("a");
+      a.download = fileName;
+      a.href = URL.createObjectURL(blob);
+      a.dataset.downloadurl = [fileType, a.download, a.href].join(":");
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () {
+        URL.revokeObjectURL(a.href);
+      }, 1500);
+    },
+
+    getInventoryItemFormatString() {
+      let result = "";
+
+      let locations = [...new Set(this.items.map(x => x.location))];
+
+      locations.forEach((x) => {
+        result = result + x + "\n";
+
+        let skus = this.items.filter(y => 
+          x == y.location
+        ).map( (a) => {return a.sku});
+
+        skus.forEach((z) => {
+          result = result + z + "\n";
+        });
+      });
+
+      console.log(result);
+      return result;
     },
   },
 };
