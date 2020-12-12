@@ -45,7 +45,7 @@
             ></v-text-field>
             <v-spacer></v-spacer>
             <v-chip class="ma-2" color="green" outlined>
-              Ubicación-temp :
+              Ubicación : 
               <b>{{ location }}</b>
             </v-chip>
           </v-toolbar>
@@ -218,7 +218,7 @@ export default {
     },
 
     downloadString() {
-      let text = "a,b,c\n1,2,3";
+      let text = this.getInventoryItemFormatString();
       let fileType = "text";
       let fileName = "archivoinventario.txt";
 
@@ -235,6 +235,27 @@ export default {
       setTimeout(function () {
         URL.revokeObjectURL(a.href);
       }, 1500);
+    },
+
+    getInventoryItemFormatString() {
+      let result = "";
+
+      let locations = [...new Set(this.items.map(x => x.location))];
+
+      locations.forEach((x) => {
+        result = result + x + "\n";
+
+        let skus = this.items.filter(y => 
+          x == y.location
+        ).map( (a) => {return a.sku});
+
+        skus.forEach((z) => {
+          result = result + z + "\n";
+        });
+      });
+
+      console.log(result);
+      return result;
     },
   },
 };
