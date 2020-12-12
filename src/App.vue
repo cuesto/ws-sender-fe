@@ -1,13 +1,10 @@
 <template>
   <v-app id="inspire">
-    <v-navigation-drawer
-      v-model="drawer"
-      app
-    >
+    <v-navigation-drawer v-model="drawer" app>
       <template>
         <v-list dense>
-          <template >
-            <v-list-item :to="{name:'Home'}">
+          <template>
+            <v-list-item :to="{ name: 'Home' }">
               <v-list-item-action>
                 <v-icon>mdi-home</v-icon>
               </v-list-item-action>
@@ -21,7 +18,7 @@
     <v-app-bar app>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
 
-      <v-toolbar-title>Inventory Management</v-toolbar-title>
+      <v-toolbar-title>Manejo de Inventario</v-toolbar-title>
     </v-app-bar>
 
     <v-main>
@@ -35,7 +32,9 @@
       <v-layout justify-center>
         <v-flex text-md-right>
           <v-card flat tile color="primary" class="white--text">
-            <v-card-text class="white--text pt-0">InfoSocial &copy;2020</v-card-text>
+            <v-card-text class="white--text pt-0"
+              >InfoSocial &copy;2020</v-card-text
+            >
           </v-card>
         </v-flex>
       </v-layout>
@@ -44,7 +43,7 @@
 </template>
 
 <script>
-  export default {
-    data: () => ({ drawer: null }),
-  }
+export default {
+  data: () => ({ drawer: null }),
+};
 </script>
