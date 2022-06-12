@@ -45,7 +45,7 @@
             ></v-text-field>
             <v-spacer></v-spacer>
             <v-chip class="ma-2" color="green" outlined>
-              Ubicación : 
+              Ubicación :
               <b>{{ location }}</b>
             </v-chip>
           </v-toolbar>
@@ -83,6 +83,7 @@
 <script>
 import Papa from "papaparse";
 import InventoryItemModel from "../models/InventoryItemModel";
+import axios from "axios";
 
 export default {
   components: {},
@@ -98,7 +99,7 @@ export default {
 
     inventoryItemModel: new InventoryItemModel(),
     loadingUploadBtn: false,
-    disableUploadBtn: true,
+    disableUploadBtn: false,
     loadingDownloadBtn: false,
     disableDownloadBtn: true,
     fileProcessed: null,
@@ -173,9 +174,36 @@ export default {
       });
     },
 
-    showUploadModal() {
-      this.uploadModal = true;
+    async showUploadModal() {
+      //this.uploadModal = true;
+  //     await axios
+  //       .post("/send-message", { number: "18096019002", message: "Hola Mundo" },{
+  //  headers: {
+          
+  //       }
+  //     })
+  //       .then(function (response) {
+  //         if (response.data.result == "ERROR") {
+  //           console.log(response.data.message);
+  //         } else {
+  //           console.log(response.data.message);
+  //         }
+  //       })
+  //       .catch(function (error) {
+  //         console.log(error.message);
+  //       });
+  this.sendWSMessage("18096019002","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS"); 
+  this.sendWSMessage("18093191124","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
+  this.sendWSMessage("18098652939","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
+  this.sendWSMessage("18297254980","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
+
     },
+   
+    async sendWSMessage(number,message) {
+      await axios
+        .post("/send-message", { number: number, message: message });
+    },
+    
     hideUploadModal() {
       this.uploadModal = false;
       this.file = null;
@@ -240,14 +268,16 @@ export default {
     getInventoryItemFormatString() {
       let result = "";
 
-      let locations = [...new Set(this.items.map(x => x.location))];
+      let locations = [...new Set(this.items.map((x) => x.location))];
 
       locations.forEach((x) => {
         result = result + x + "\n";
 
-        let skus = this.items.filter(y => 
-          x == y.location
-        ).map( (a) => {return a.sku});
+        let skus = this.items
+          .filter((y) => x == y.location)
+          .map((a) => {
+            return a.sku;
+          });
 
         skus.forEach((z) => {
           result = result + z + "\n";
