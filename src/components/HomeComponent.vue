@@ -4,14 +4,13 @@
       <v-data-table
         :headers="headers"
         :items="items"
-        sort-by="location"
         class="elevation-1"
         :items-per-page="50"
         :footer-props="{ 'items-per-page-options': [50, 100, 250, 500] }"
       >
         <template v-slot:top>
           <v-toolbar flat color="white">
-            <v-toolbar-title>Conteo de Inventario</v-toolbar-title>
+            <v-toolbar-title>Clientes</v-toolbar-title>
             <v-divider class="mx-4" inset vertical></v-divider>
             <v-btn
               :loading="loadingUploadBtn"
@@ -36,7 +35,7 @@
             <v-spacer></v-spacer>
             <v-text-field
               class="text-xs-center"
-              v-model="sku"
+              v-model="code"
               append-icon="mdi-barcode"
               label="Paquete"
               single-line
@@ -46,7 +45,7 @@
             <v-spacer></v-spacer>
             <v-chip class="ma-2" color="green" outlined>
               Ubicación :
-              <b>{{ location }}</b>
+              <b>{{ name }}</b>
             </v-chip>
           </v-toolbar>
         </template>
@@ -67,7 +66,7 @@
               accept="file/*.csv"
               label="Cargar Plantilla"
             ></v-file-input>
-            <v-btn @click="UploadInventoryItems()" color="blue" dark>
+            <v-btn @click="UploadClientsTemplate()" color="blue" dark>
               <v-icon left>mdi-cloud-upload</v-icon>Cargar
             </v-btn>
             <v-btn @click="hideUploadModal()" color="blue darken-1" text
@@ -89,13 +88,14 @@ export default {
   components: {},
   data: () => ({
     headers: [
-      { text: "Tracking", sortable: true, value: "sku" },
-      { text: "Ubicación", sortable: true, value: "location" },
+      { text: "Codigo", sortable: true, value: "code" },
+      { text: "Nombre", sortable: true, value: "name" },
+      { text: "Celular", sortable: true, value: "phone" },
       { text: "Opciones", value: "options", sortable: false },
     ],
     items: [],
-    sku: "",
-    location: "",
+    code: "",
+    name: "",
 
     inventoryItemModel: new InventoryItemModel(),
     loadingUploadBtn: false,
@@ -110,22 +110,22 @@ export default {
   mounted() {},
 
   methods: {
-    // displayNotification(type, message) {
-    //   this.$swal.fire({
-    //     position: "top-end",
-    //     type: type,
-    //     title: message,
-    //     showConfirmButton: false,
-    //     timer: 1000,
-    //   });
-    // },
+    displayNotification(type, message) {
+      this.$swal.fire({
+        position: "top-end",
+        type: type,
+        title: message,
+        showConfirmButton: false,
+        timer: 1000,
+      });
+    },
     validateKeyPressed(e) {
       if (e.keyCode === 13) {
-        this.addSku();
+        this.addcode();
       }
     },
 
-    UploadInventoryItems() {
+    UploadClientsTemplate() {
       if (this.file == null) {
         alert("El archivo es de un formato incorrecto o no se ha cargado.");
         // this.displayNotification(
@@ -141,22 +141,25 @@ export default {
         header: true,
         complete: function (results) {
           me.fileProcessed = results.data;
-          var inventoryItemList = results.data.map((a) => {
+          var customersList = results.data.map((a) => {
             return {
-              sku: a.SKU,
-              location: a.LOCATION,
+              code: a.Codigo,
+              name: a.Nombres,
+              phone: a.TelCelular,
             };
           });
 
-          inventoryItemList = inventoryItemList.filter(
+          customersList = customersList.filter(
             (x) =>
-              x.sku != undefined &&
-              x.sku != "" &&
-              x.location != undefined &&
-              x.location != ""
+              x.code != undefined &&
+              x.code != "" &&
+              x.name != undefined &&
+              x.name != "" &&
+              x.phone != undefined &&
+              x.phone != ""
           );
 
-          if (inventoryItemList.length == 0) {
+          if (customersList.length == 0) {
             alert(
               "No se pudo procesar el archivo, revise el formato o los datos."
             );
@@ -166,16 +169,18 @@ export default {
 
           me.uploadModal = false;
           alert("Se cargaron los registros correctamente.");
+            me.displayNotification("error", "No se pudo procesar el archivo, revise el formato.");
 
-          inventoryItemList.forEach((a) => {
-            me.items.push({ sku: a.sku, location: a.location });
+
+          customersList.forEach((a) => {
+            me.items.push({ code: a.code, name: a.name, phone: a.phone });
           });
         },
       });
     },
 
     async showUploadModal() {
-      //this.uploadModal = true;
+      this.uploadModal = true;
   //     await axios
   //       .post("/send-message", { number: "18096019002", message: "Hola Mundo" },{
   //  headers: {
@@ -192,10 +197,10 @@ export default {
   //       .catch(function (error) {
   //         console.log(error.message);
   //       });
-  this.sendWSMessage("18096019002","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS"); 
-  this.sendWSMessage("18093191124","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
-  this.sendWSMessage("18098652939","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
-  this.sendWSMessage("18297254980","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
+  // this.sendWSMessage("18096019002","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS"); 
+  // this.sendWSMessage("18093191124","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
+  // this.sendWSMessage("18098652939","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
+  // this.sendWSMessage("18297254980","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
 
     },
    
@@ -209,40 +214,40 @@ export default {
       this.file = null;
     },
 
-    addSku() {
-      let firstLetter = this.sku.charAt(0);
+    addcode() {
+      let firstLetter = this.code.charAt(0);
 
       if (
         this.items.length == 0 &&
         firstLetter != "." &&
-        this.location === ""
+        this.name === ""
       ) {
         alert("Específique ubicación");
         //this.displayNotification("error", "Especifique Ubicación.");
-        this.cleanSku();
+        this.cleancode();
         return;
       }
 
       if (this.items.length == 0 && firstLetter === ".") {
-        this.location = this.sku;
-        this.cleanSku();
+        this.name = this.code;
+        this.cleancode();
         return;
       }
 
       if (this.items.length > 0 && firstLetter === ".") {
-        this.location = this.sku;
-        this.cleanSku();
+        this.name = this.code;
+        this.cleancode();
         return;
       }
 
-      this.items.push({ sku: this.sku, location: this.location });
+      this.items.push({ code: this.code, name: this.name });
 
       if (this.disableDownloadBtn) this.disableDownloadBtn = false;
 
-      this.cleanSku();
+      this.cleancode();
     },
-    cleanSku() {
-      this.sku = "";
+    cleancode() {
+      this.code = "";
     },
 
     downloadString() {
@@ -268,18 +273,18 @@ export default {
     getInventoryItemFormatString() {
       let result = "";
 
-      let locations = [...new Set(this.items.map((x) => x.location))];
+      let names = [...new Set(this.items.map((x) => x.name))];
 
-      locations.forEach((x) => {
+      names.forEach((x) => {
         result = result + x + "\n";
 
-        let skus = this.items
-          .filter((y) => x == y.location)
+        let codes = this.items
+          .filter((y) => x == y.name)
           .map((a) => {
-            return a.sku;
+            return a.code;
           });
 
-        skus.forEach((z) => {
+        codes.forEach((z) => {
           result = result + z + "\n";
         });
       });

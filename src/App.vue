@@ -10,6 +10,12 @@
               </v-list-item-action>
               <v-list-item-title>Inicio</v-list-item-title>
             </v-list-item>
+            <v-list-item :to="{ name: 'Home' }">
+              <v-list-item-action>
+                <v-icon>settings</v-icon>
+              </v-list-item-action>
+              <v-list-item-title>Configuración</v-list-item-title>
+            </v-list-item>
           </template>
         </v-list>
       </template>
@@ -18,7 +24,7 @@
     <v-app-bar app>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
 
-      <v-toolbar-title>Manejo de Inventario</v-toolbar-title>
+      <v-toolbar-title>Envío de Mensajes por WhatsApp</v-toolbar-title>
     </v-app-bar>
 
     <v-main>
@@ -33,7 +39,7 @@
         <v-flex text-md-right>
           <v-card flat tile color="primary" class="white--text">
             <v-card-text class="white--text pt-0"
-              >InfoSocial &copy;2020</v-card-text
+              >InfoSocial &copy;2022</v-card-text
             >
           </v-card>
         </v-flex>
