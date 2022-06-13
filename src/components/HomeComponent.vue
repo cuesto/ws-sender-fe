@@ -34,22 +34,16 @@
             ></v-text-field>
             <v-spacer></v-spacer>
             <v-btn
-              :loading="loadingDownloadBtn"
-              :disabled="disableDownloadBtn"
+              :loading="loadingSendBtn"
+              :disabled="disableSendBtn"
               color="green"
               class="ma-2 white--text"
-              @click="downloadString"
+              @click="sendWSMessage"
             >
               Enviar Mensaje
               <v-icon right dark> mdi-send</v-icon>
             </v-btn>
           </v-toolbar>
-        </template>
-        <template v-slot:[`item.actions`]="{ item }">
-          <!-- <template v-slot:item.options="{ item }"> -->
-          <v-icon size="sm" color="red" class="mr-1" @click="deleteItem(item)"
-            >mdi-delete</v-icon
-          >
         </template>
       </v-data-table>
     </v-flex>
@@ -87,7 +81,6 @@ export default {
       { text: "Codigo", sortable: true, value: "code" },
       { text: "Nombre", sortable: true, value: "name" },
       { text: "Celular", sortable: true, value: "phone" },
-      //{ text: "Opciones", value: "options", sortable: false },
     ],
     items: [],
     code: "",
@@ -96,8 +89,8 @@ export default {
     inventoryItemModel: new InventoryItemModel(),
     loadingUploadBtn: false,
     disableUploadBtn: false,
-    loadingDownloadBtn: false,
-    disableDownloadBtn: true,
+    loadingSendBtn: false,
+    disableSendBtn: false,
     fileProcessed: null,
     file: null,
     uploadModal: false,
@@ -115,19 +108,14 @@ export default {
         timer: 1000,
       });
     },
-    validateKeyPressed(e) {
-      if (e.keyCode === 13) {
-        this.addcode();
-      }
-    },
 
     UploadClientsTemplate() {
       if (this.file == null) {
-        alert("El archivo es de un formato incorrecto o no se ha cargado.");
-        // this.displayNotification(
-        //   "error",
-        //   "El archivo es de un formato incorrecto o no se ha cargado."
-        // );
+        //alert("El archivo es de un formato incorrecto o no se ha cargado.");
+        this.displayNotification(
+          "error",
+          "El archivo es de un formato incorrecto o no se ha cargado."
+        );
         return;
       }
 
@@ -156,10 +144,13 @@ export default {
           );
 
           if (customersList.length == 0) {
-            alert(
-              "No se pudo procesar el archivo, revise el formato o los datos."
+            // alert(
+            //   "No se pudo procesar el archivo, revise el formato o los datos."
+            // );
+            me.displayNotification(
+              "error",
+              "No se pudo procesar el archivo, revise el formato."
             );
-            //me.displayNotification("error", "No se pudo procesar el archivo, revise el formato.");
             return;
           }
 
@@ -179,114 +170,36 @@ export default {
 
     async showUploadModal() {
       this.uploadModal = true;
-      //     await axios
-      //       .post("/send-message", { number: "18096019002", message: "Hola Mundo" },{
-      //  headers: {
-
-      //       }
-      //     })
-      //       .then(function (response) {
-      //         if (response.data.result == "ERROR") {
-      //           console.log(response.data.message);
-      //         } else {
-      //           console.log(response.data.message);
-      //         }
-      //       })
-      //       .catch(function (error) {
-      //         console.log(error.message);
-      //       });
-      // this.sendWSMessage("18096019002","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
-      // this.sendWSMessage("18093191124","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
-      // this.sendWSMessage("18098652939","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
-      // this.sendWSMessage("18297254980","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
     },
 
-    async sendWSMessage(number, message) {
-      await axios.post("/send-message", { number: number, message: message });
+    async sendWSMessage() {
+      this.disableSendBtn = true;
+      this.items.forEach((a) => {
+        let message = this.prepareSendWSMessage(a.name);
+        axios.post("/send-message", {
+          number: "1" + a.phone,
+          message: message,
+        });
+      });
+      this.displayNotification(
+            "success",
+            "Se envió el mensaje a los clientes."
+          );
+      this.disableSendBtn = false;
+      //await axios.post("/send-message", { number: number, message: message });
+    },
+
+    prepareSendWSMessage(name) {
+      let message =
+        "¡Hola " +
+        name +
+        "!, Te escribimos de *Domex Herrera* para informarte que tu(s) paquete(s) está(n) disponible(s).\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio *GRATIS* o puede pasarlo a retirar por la sucursal.";
+      return message;
     },
 
     hideUploadModal() {
       this.uploadModal = false;
       this.file = null;
-    },
-
-    // addcode() {
-    //   let firstLetter = this.code.charAt(0);
-
-    //   if (
-    //     this.items.length == 0 &&
-    //     firstLetter != "." &&
-    //     this.name === ""
-    //   ) {
-    //     alert("Específique ubicación");
-    //     //this.displayNotification("error", "Especifique Ubicación.");
-    //     this.cleancode();
-    //     return;
-    //   }
-
-    //   if (this.items.length == 0 && firstLetter === ".") {
-    //     this.name = this.code;
-    //     this.cleancode();
-    //     return;
-    //   }
-
-    //   if (this.items.length > 0 && firstLetter === ".") {
-    //     this.name = this.code;
-    //     this.cleancode();
-    //     return;
-    //   }
-
-    //   this.items.push({ code: this.code, name: this.name });
-
-    //   if (this.disableDownloadBtn) this.disableDownloadBtn = false;
-
-    //   this.cleancode();
-    // },
-    cleancode() {
-      this.code = "";
-    },
-
-    downloadString() {
-      let text = this.getInventoryItemFormatString();
-      let fileType = "text";
-      let fileName = "archivoinventario.txt";
-
-      var blob = new Blob([text], { type: fileType });
-      console.log(text);
-      var a = document.createElement("a");
-      a.download = fileName;
-      a.href = URL.createObjectURL(blob);
-      a.dataset.downloadurl = [fileType, a.download, a.href].join(":");
-      a.style.display = "none";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(function () {
-        URL.revokeObjectURL(a.href);
-      }, 1500);
-    },
-
-    getInventoryItemFormatString() {
-      let result = "";
-
-      let names = [...new Set(this.items.map((x) => x.name))];
-
-      names.forEach((x) => {
-        result = result + x + "\n";
-
-        let codes = this.items
-          .filter((y) => x == y.name)
-          .map((a) => {
-            return a.code;
-          });
-
-        codes.forEach((z) => {
-          result = result + z + "\n";
-        });
-      });
-
-      console.log(result);
-      return result;
     },
   },
 };
