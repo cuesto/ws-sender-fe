@@ -3,6 +3,7 @@
     <v-flex>
       <v-data-table
         :headers="headers"
+        :search="search"
         :items="items"
         class="elevation-1"
         :items-per-page="50"
@@ -15,38 +16,33 @@
             <v-btn
               :loading="loadingUploadBtn"
               :disabled="disableUploadBtn"
-              color="green"
+              color="blue"
               class="ma-2 white--text"
               @click="showUploadModal"
             >
               Cargar
               <v-icon right dark> mdi-cloud-upload </v-icon>
             </v-btn>
-            <v-btn
-              :loading="loadingDownloadBtn"
-              :disabled="disableDownloadBtn"
-              color="red"
-              class="ma-2 white--text"
-              @click="downloadString"
-            >
-              Descargar
-              <v-icon right dark> mdi-cloud-download </v-icon>
-            </v-btn>
             <v-spacer></v-spacer>
             <v-text-field
               class="text-xs-center"
-              v-model="code"
-              append-icon="mdi-barcode"
-              label="Paquete"
+              v-model="search"
+              append-icon="search"
+              label="Buscar"
               single-line
               hide-details
-              v-on:keyup="validateKeyPressed"
             ></v-text-field>
             <v-spacer></v-spacer>
-            <v-chip class="ma-2" color="green" outlined>
-              Ubicación :
-              <b>{{ name }}</b>
-            </v-chip>
+            <v-btn
+              :loading="loadingDownloadBtn"
+              :disabled="disableDownloadBtn"
+              color="green"
+              class="ma-2 white--text"
+              @click="downloadString"
+            >
+              Enviar Mensaje
+              <v-icon right dark> mdi-send</v-icon>
+            </v-btn>
           </v-toolbar>
         </template>
         <template v-slot:[`item.actions`]="{ item }">
@@ -91,12 +87,12 @@ export default {
       { text: "Codigo", sortable: true, value: "code" },
       { text: "Nombre", sortable: true, value: "name" },
       { text: "Celular", sortable: true, value: "phone" },
-      { text: "Opciones", value: "options", sortable: false },
+      //{ text: "Opciones", value: "options", sortable: false },
     ],
     items: [],
     code: "",
     name: "",
-
+    search: "",
     inventoryItemModel: new InventoryItemModel(),
     loadingUploadBtn: false,
     disableUploadBtn: false,
@@ -168,9 +164,11 @@ export default {
           }
 
           me.uploadModal = false;
-          alert("Se cargaron los registros correctamente.");
-            me.displayNotification("error", "No se pudo procesar el archivo, revise el formato.");
-
+          //alert(".Se cargaron los registros correctamente");
+          me.displayNotification(
+            "success",
+            "Se cargaron los registros correctamente."
+          );
 
           customersList.forEach((a) => {
             me.items.push({ code: a.code, name: a.name, phone: a.phone });
@@ -181,71 +179,69 @@ export default {
 
     async showUploadModal() {
       this.uploadModal = true;
-  //     await axios
-  //       .post("/send-message", { number: "18096019002", message: "Hola Mundo" },{
-  //  headers: {
-          
-  //       }
-  //     })
-  //       .then(function (response) {
-  //         if (response.data.result == "ERROR") {
-  //           console.log(response.data.message);
-  //         } else {
-  //           console.log(response.data.message);
-  //         }
-  //       })
-  //       .catch(function (error) {
-  //         console.log(error.message);
-  //       });
-  // this.sendWSMessage("18096019002","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS"); 
-  // this.sendWSMessage("18093191124","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
-  // this.sendWSMessage("18098652939","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
-  // this.sendWSMessage("18297254980","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
+      //     await axios
+      //       .post("/send-message", { number: "18096019002", message: "Hola Mundo" },{
+      //  headers: {
 
+      //       }
+      //     })
+      //       .then(function (response) {
+      //         if (response.data.result == "ERROR") {
+      //           console.log(response.data.message);
+      //         } else {
+      //           console.log(response.data.message);
+      //         }
+      //       })
+      //       .catch(function (error) {
+      //         console.log(error.message);
+      //       });
+      // this.sendWSMessage("18096019002","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
+      // this.sendWSMessage("18093191124","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
+      // this.sendWSMessage("18098652939","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
+      // this.sendWSMessage("18297254980","Hola Mundo!, Este es un mensaje de prueba de la nueva APP de envio de mensajes por WS");
     },
-   
-    async sendWSMessage(number,message) {
-      await axios
-        .post("/send-message", { number: number, message: message });
+
+    async sendWSMessage(number, message) {
+      await axios.post("/send-message", { number: number, message: message });
     },
-    
+
     hideUploadModal() {
       this.uploadModal = false;
       this.file = null;
     },
 
-    addcode() {
-      let firstLetter = this.code.charAt(0);
+    // addcode() {
+    //   let firstLetter = this.code.charAt(0);
 
-      if (
-        this.items.length == 0 &&
-        firstLetter != "." &&
-        this.name === ""
-      ) {
-        alert("Específique ubicación");
-        //this.displayNotification("error", "Especifique Ubicación.");
-        this.cleancode();
-        return;
-      }
+    //   if (
+    //     this.items.length == 0 &&
+    //     firstLetter != "." &&
+    //     this.name === ""
+    //   ) {
+    //     alert("Específique ubicación");
+    //     //this.displayNotification("error", "Especifique Ubicación.");
+    //     this.cleancode();
+    //     return;
+    //   }
 
-      if (this.items.length == 0 && firstLetter === ".") {
-        this.name = this.code;
-        this.cleancode();
-        return;
-      }
+    //   if (this.items.length == 0 && firstLetter === ".") {
+    //     this.name = this.code;
+    //     this.cleancode();
+    //     return;
+    //   }
 
-      if (this.items.length > 0 && firstLetter === ".") {
-        this.name = this.code;
-        this.cleancode();
-        return;
-      }
+    //   if (this.items.length > 0 && firstLetter === ".") {
+    //     this.name = this.code;
+    //     this.cleancode();
+    //     return;
+    //   }
 
-      this.items.push({ code: this.code, name: this.name });
+    //   this.items.push({ code: this.code, name: this.name });
 
-      if (this.disableDownloadBtn) this.disableDownloadBtn = false;
+    //   if (this.disableDownloadBtn) this.disableDownloadBtn = false;
 
-      this.cleancode();
-    },
+    //   this.cleancode();
+    // },
     cleancode() {
       this.code = "";
     },
