@@ -1,60 +1,55 @@
 <template>
-  <v-app>
-    <v-app-bar
-      app
-      color="primary"
-      dark
-    >
-      <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
+  <v-app id="inspire">
+    <v-navigation-drawer v-model="drawer" app>
+      <template>
+        <v-list dense>
+          <template>
+            <v-list-item :to="{ name: 'Home' }">
+              <v-list-item-action>
+                <v-icon>mdi-home</v-icon>
+              </v-list-item-action>
+              <v-list-item-title>Inicio</v-list-item-title>
+            </v-list-item>
+            <v-list-item :to="{ name: 'Home' }">
+              <v-list-item-action>
+                <v-icon>settings</v-icon>
+              </v-list-item-action>
+              <v-list-item-title>Configuración</v-list-item-title>
+            </v-list-item>
+          </template>
+        </v-list>
+      </template>
+    </v-navigation-drawer>
 
-        <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
-      </div>
+    <v-app-bar app>
+      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
 
-      <v-spacer></v-spacer>
-
-      <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
-      >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
-      </v-btn>
+      <v-toolbar-title>Envío de Mensajes por WhatsApp</v-toolbar-title>
     </v-app-bar>
 
-    <v-content>
-      <HelloWorld/>
-    </v-content>
+    <v-main>
+      <v-container fluid fill-height>
+        <v-slide-y-transition mode="out-in">
+          <router-view />
+        </v-slide-y-transition>
+      </v-container>
+    </v-main>
+    <v-footer blue height="auto">
+      <v-layout justify-center>
+        <v-flex text-md-right>
+          <v-card flat tile color="primary" class="white--text">
+            <v-card-text class="white--text pt-0"
+              >InfoSocial &copy;2022</v-card-text
+            >
+          </v-card>
+        </v-flex>
+      </v-layout>
+    </v-footer>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld';
-
 export default {
-  name: 'App',
-
-  components: {
-    HelloWorld,
-  },
-
-  data: () => ({
-    //
-  }),
+  data: () => ({ drawer: null }),
 };
 </script>

@@ -1,4 +1,7 @@
+![Node Continuous Integration](https://github.com/cuesto/ims-vue/workflows/Node%20Continuous%20Integration/badge.svg)
+![Firebase Continuous Deployment](https://github.com/cuesto/ims-vue/workflows/Firebase%20Continuous%20Deployment/badge.svg)
 # ims-vue
+[Demo](https://ims-spa.web.app/)
 
 ## Project setup
 ```
