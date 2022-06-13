@@ -17,6 +17,7 @@
     "roboto-fontface": "*",
     "vue": "^2.6.11",
     "vue-router": "^3.4.2",
+    "vue-sweetalert2": "^2.1.5",
     "vuetify": "^2.3.8",
     "vuex": "^3.4.0"
   },
