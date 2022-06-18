@@ -12,7 +12,7 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 
 Vue.config.productionTip = false;
 
-axios.defaults.baseURL = "http://localhost:8000/"; //dev
+//axios.defaults.baseURL = "http://localhost:8000/"; //dev
 axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 
 Vue.use(VueSweetalert2);
