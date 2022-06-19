@@ -1,8 +1,7 @@
 name: Build and Deploy to Firebase
 on:
   push:
-    branches:
-      - feat/read-google-sheet
+    branches: [ master, qa, development ]
 
 jobs:
   build:
