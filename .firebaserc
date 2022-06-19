@@ -1,5 +1,10 @@
 {
   "projects": {
     "default": "ims-spa"
+  },
+  "targets": {
+    "ims-spa": {
+      "hosting": {}
+    }
   }
 }

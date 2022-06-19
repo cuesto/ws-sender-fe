@@ -97,7 +97,9 @@ export default {
   }),
   watch: {},
   mounted() {},
-
+  created() {
+    this.getClients();
+  },
   methods: {
     displayNotification(type, message) {
       this.$swal.fire({
@@ -107,6 +109,20 @@ export default {
         showConfirmButton: false,
         timer: 1000,
       });
+    },
+
+    getClients() {
+      console.log("getClients");
+      //https://sheets.googleapis.com/v4/spreadsheets/1D7Xt6sK2we1z6mdxjLssCUgyGLJRlmHeOaZEYhe2BLU/values/Clientes-Limpio!A:C?key=AIzaSyCVWCtIuxgTA8GLfOJYz9PwDgBeBIE5fPQ
+      axios
+        .get("https://sheets.googleapis.com/v4/spreadsheets/1D7Xt6sK2we1z6mdxjLssCUgyGLJRlmHeOaZEYhe2BLU/values/Clientes-Limpio!A:C?key=AIzaSyCVWCtIuxgTA8GLfOJYz9PwDgBeBIE5fPQ")
+        .then((response) => {
+          //this.items = response.data;
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
 
     UploadClientsTemplate() {
@@ -176,15 +192,15 @@ export default {
       this.disableSendBtn = true;
       this.items.forEach((a) => {
         let message = this.prepareSendWSMessage(a.name);
-        axios.post("/send-message", {
+        axios.post("https://frozen-crag-74487.herokuapp.com/send-message", {
           number: "1" + a.phone,
           message: message,
         });
       });
       this.displayNotification(
-            "success",
-            "Se envió el mensaje a los clientes."
-          );
+        "success",
+        "Se envió el mensaje a los clientes."
+      );
       this.disableSendBtn = false;
       //await axios.post("/send-message", { number: number, message: message });
     },
