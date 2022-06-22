@@ -98,7 +98,7 @@ export default {
   watch: {},
   mounted() {},
   created() {
-    this.getClients();
+    //this.getClients();
   },
   methods: {
     displayNotification(type, message) {
