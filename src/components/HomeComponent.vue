@@ -192,7 +192,7 @@ export default {
       this.disableSendBtn = true;
       this.items.forEach((a) => {
         let message = this.prepareSendWSMessage(a.name);
-        axios.post("https://frozen-crag-74487.herokuapp.com/send-message", {
+        axios.post("/send-message", {
           number: "1" + a.phone,
           message: message,
         });
