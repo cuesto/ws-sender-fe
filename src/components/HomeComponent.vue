@@ -111,19 +111,19 @@ export default {
       });
     },
 
-    getClients() {
-      console.log("getClients");
-      //https://sheets.googleapis.com/v4/spreadsheets/1D7Xt6sK2we1z6mdxjLssCUgyGLJRlmHeOaZEYhe2BLU/values/Clientes-Limpio!A:C?key=AIzaSyCVWCtIuxgTA8GLfOJYz9PwDgBeBIE5fPQ
-      axios
-        .get("https://sheets.googleapis.com/v4/spreadsheets/1D7Xt6sK2we1z6mdxjLssCUgyGLJRlmHeOaZEYhe2BLU/values/Clientes-Limpio!A:C?key=AIzaSyCVWCtIuxgTA8GLfOJYz9PwDgBeBIE5fPQ")
-        .then((response) => {
-          //this.items = response.data;
-          console.log(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    },
+    // getClients() {
+    //   console.log("getClients");
+    //   //https://sheets.googleapis.com/v4/spreadsheets/1D7Xt6sK2we1z6mdxjLssCUgyGLJRlmHeOaZEYhe2BLU/values/Clientes-Limpio!A:C?key=AIzaSyCVWCtIuxgTA8GLfOJYz9PwDgBeBIE5fPQ
+    //   axios
+    //     .get("https://sheets.googleapis.com/v4/spreadsheets/1D7Xt6sK2we1z6mdxjLssCUgyGLJRlmHeOaZEYhe2BLU/values/Clientes-Limpio!A:C?key=AIzaSyCVWCtIuxgTA8GLfOJYz9PwDgBeBIE5fPQ")
+    //     .then((response) => {
+    //       //this.items = response.data;
+    //       console.log(response.data);
+    //     })
+    //     .catch((error) => {
+    //       console.log(error);
+    //     });
+    // },
 
     UploadClientsTemplate() {
       if (this.file == null) {

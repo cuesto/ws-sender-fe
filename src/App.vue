@@ -23,8 +23,12 @@
 
     <v-app-bar app>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-
       <v-toolbar-title>Envío de Mensajes por WhatsApp</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn color="red" class="ma-2 white--text" @click="logout">
+        LogOut
+        <v-icon right dark>mdi-logout</v-icon>
+      </v-btn>
     </v-app-bar>
 
     <v-main>
@@ -49,7 +53,23 @@
 </template>
 
 <script>
+import firebase from "firebase";
+import router from "./router/index";
+
 export default {
   data: () => ({ drawer: null }),
+  methods: {
+    async logout() {
+      firebase
+        .auth()
+        .signOut()
+        .then(() => {
+          router.push("/login");
+        })
+        .catch((error) => {
+          router.push("/login");
+        });
+    },
+  },
 };
 </script>

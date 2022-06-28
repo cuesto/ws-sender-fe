@@ -29,8 +29,8 @@ export default new Vuex.Store({
     
       // create user profile object in userCollections
       await fb.usersCollection.doc(user.uid).set({
-        name: form.name//,
-        //title: form.title
+        name: form.name,
+        server: form.server
       })
     
       // fetch user profile and set in state
@@ -46,7 +46,21 @@ export default new Vuex.Store({
 
       // change route to dashboard
       router.push('/')
-    }
+    },
+
+   async logout() {
+   await   fb
+        .auth()
+        .signOut()
+        .then(() => {
+          alert('Successfully logged out');
+          router.push('/');
+        })
+        .catch(error => {
+          alert(error.message);
+          router.push('/');
+        });
+    },
   },
   modules: {
   }

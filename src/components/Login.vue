@@ -33,7 +33,7 @@
                   <v-flex class="red--text" v-if="error">{{ error }}</v-flex>
                   <v-btn color="primary" @click="login">Ingresar</v-btn>
                   <div class="extras">
-                    <a @click="togglePasswordReset()">Olvidar Contraseña</a>
+                    <!-- <a @click="togglePasswordReset()">Olvidar Contraseña</a> -->
                     <v-spacer></v-spacer>
                     <a @click="toggleForm()">Crear una cuenta</a>
                   </div>
@@ -65,6 +65,14 @@
                     type="password"
                     :rules="[rules.required]"
                   ></v-text-field>
+                  <v-text-field
+                    v-model.trim="signupForm.server"
+                    label="Servidor"
+                    name="server"
+                    prepend-icon="Storage"
+                    type="text"
+                    :rules="[rules.required]"
+                  ></v-text-field>
                   <v-flex class="red--text" v-if="error">{{ error }}</v-flex>
                   <v-btn color="primary" @click="signup">Registrar</v-btn>
 
@@ -93,6 +101,7 @@ export default {
       name: "",
       email: "",
       password: "",
+      server: ""
     },
     showLoginForm: true,
     rules: {
@@ -114,14 +123,16 @@ export default {
         email: this.loginForm.email,
         password: this.loginForm.password,
       });
-      //this.$router.push({ name: "home" });
+      this.$router.push({ name: "home" });
     },
     signup() {
       this.$store.dispatch("signup", {
         email: this.signupForm.email,
         password: this.signupForm.password,
         name: this.signupForm.name,
+        server: this.signupForm.server
       });
+      this.$router.push({ name: "login" });
     },
   },
 };
