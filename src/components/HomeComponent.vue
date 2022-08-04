@@ -207,9 +207,13 @@ export default {
 
     prepareSendWSMessage(name) {
       let message =
-        "¡Hola " +
+      "Este mes celebramos a nuestros superhéroes🦸🏻‍♂️ favoritos... ¡Los padres!👨‍👧‍👦💛 Pide tus regalos para papá y tráelo con Domex porque este verano te damos un 22% OFF en flete de 7 libras o más.🙌🏻 \n\n"
+      +"Quedan pocos días,🕑 no esperes más... ¡Papá se merece todo en este verano!🌴😉 \n\n"
+      +"https://www.instagram.com/p/CgPu9YEpQEZ/"
+      /*  "¡Hola " +
         name +
         "!, Te escribimos de *Domex Herrera* para informarte que tu(s) paquete(s) está(n) disponible(s).\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio *GRATIS* o puede pasarlo a retirar por la sucursal.";
+      */
       return message;
     },
 

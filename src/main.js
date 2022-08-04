@@ -12,8 +12,8 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 
 Vue.config.productionTip = false;
 
-//axios.defaults.baseURL = "http://localhost:8000"; //dev
-axios.defaults.baseURL = "https://frozen-crag-74487.herokuapp.com"; //prod
+axios.defaults.baseURL = "http://localhost:8000"; //dev
+//axios.defaults.baseURL = "https://frozen-crag-74487.herokuapp.com"; //prod
 
 axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 
