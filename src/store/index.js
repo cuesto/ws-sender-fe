@@ -7,7 +7,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    userProfile: {}
+    userProfile: null
   },
   mutations: {
     setUserProfile(state, val) {
@@ -18,7 +18,6 @@ export default new Vuex.Store({
     async login({ dispatch }, form) {
       // sign user in
       const { user } = await fb.auth.signInWithEmailAndPassword(form.email, form.password)
-      console.log(user);
       // fetch user profile and set in state
       dispatch('fetchUserProfile', user)
     },
@@ -49,7 +48,7 @@ export default new Vuex.Store({
     },
 
    async logout() {
-   await   fb
+       await  fb
         .auth()
         .signOut()
         .then(() => {

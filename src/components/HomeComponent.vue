@@ -40,6 +40,16 @@
               class="ma-2 white--text"
               @click="sendWSMessage"
             >
+              Mensaje Prueba
+              <v-icon right dark> mdi-send</v-icon>
+            </v-btn>
+            <v-btn
+              :loading="loadingSendBtn"
+              :disabled="disableSendBtn"
+              color="green"
+              class="ma-2 white--text"
+              @click="sendWSMessage"
+            >
               Enviar Mensaje
               <v-icon right dark> mdi-send</v-icon>
             </v-btn>
