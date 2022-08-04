@@ -1,6 +1,6 @@
 <template>
   <v-app id="inspire">
-    <v-navigation-drawer v-model="drawer" app>
+    <v-navigation-drawer v-model="drawer" v-if="logged" app>
       <template>
         <v-list dense>
           <template>
@@ -10,7 +10,7 @@
               </v-list-item-action>
               <v-list-item-title>Inicio</v-list-item-title>
             </v-list-item>
-            <v-list-item :to="{ name: 'Home' }">
+            <v-list-item :to="{ name: 'Configuration' }">
               <v-list-item-action>
                 <v-icon>settings</v-icon>
               </v-list-item-action>
@@ -22,10 +22,10 @@
     </v-navigation-drawer>
 
     <v-app-bar app>
-      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title>Envío de Mensajes por WhatsApp</v-toolbar-title>
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+      <!-- <v-toolbar-title>Envío de Mensajes por WhatsApp</v-toolbar-title> -->
       <v-spacer></v-spacer>
-      <v-btn color="red" class="ma-2 white--text" @click="logout">
+      <v-btn color="red" class="ma-2 white--text" @click="logout" v-if="logged">
         LogOut
         <v-icon right dark>mdi-logout</v-icon>
       </v-btn>
@@ -58,12 +58,19 @@ import router from "./router/index";
 
 export default {
   data: () => ({ drawer: null }),
+  computed: {
+    logged() {
+      if (this.$store.state.userProfile == null) this.logout();
+      return this.$store.state.userProfile;
+    },
+  },
   methods: {
     async logout() {
       firebase
         .auth()
         .signOut()
         .then(() => {
+          this.$store.state.userProfile = null;
           router.push("/login");
         })
         .catch((error) => {
