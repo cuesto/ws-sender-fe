@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x, 14.x, 16.x]
+        node-version: [14.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -40,24 +40,24 @@ jobs:
     - name: 💥 Install Dependencies
       run: npm ci
 
-    - name: 🧹 Linting
-      run: npm run lint
+    # - name: 🧹 Linting
+    #   run: npm run lint
         
-    - name: 🕵️ Unit Tests
-      run: npm run test
+    # - name: 🕵️ Unit Tests
+    #   run: npm run test
 
     - name: 🔨 Build Project
       run: npm run build
     
-    - name: 🖼️ Build Storybook
-      run: npm run storybook:build
+    # - name: 🖼️ Build Storybook
+    #   run: npm run storybook:build
 
-    - name: 🧪 Integration Tests
-      run: npm run test:ci
+    # - name: 🧪 Integration Tests
+    #   run: npm run test:ci
     
-    # Save videos and screenshots as test artifacts (https://github.com/actions/upload-artifact)
-    - uses: actions/upload-artifact@v2
-      with:
-        name: screenshots
-        path: cypress/screenshots
-        if: failure() # Only upload screenshots if previous step has failed (i.e. if there are test failures)
+    # # Save videos and screenshots as test artifacts (https://github.com/actions/upload-artifact)
+    # - uses: actions/upload-artifact@v2
+    #   with:
+    #     name: screenshots
+    #     path: cypress/screenshots
+    #     if: failure() # Only upload screenshots if previous step has failed (i.e. if there are test failures)
