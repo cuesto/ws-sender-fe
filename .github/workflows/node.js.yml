@@ -46,8 +46,8 @@ jobs:
     # - name: 🕵️ Unit Tests
     #   run: npm run test
 
-    - name: 🔨 Build Project
-      run: npm run build
+    # - name: 🔨 Build Project
+    #   run: npm run build
     
     # - name: 🖼️ Build Storybook
     #   run: npm run storybook:build
