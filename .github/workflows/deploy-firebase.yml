@@ -1,7 +1,7 @@
 name: Build and Deploy to Firebase
 on:
   push:
-    branches: [ master, qa, development ]
+    branches: [ master ]
 
 jobs:
   build:
