@@ -57,7 +57,7 @@
         </template>
       </v-data-table>
     </v-flex>
-    <v-dialog v-model="uploadModal" max-width="200px">
+    <v-dialog v-model="uploadModal" max-width="500px">
       <v-card>
         <v-card-text>
           <template>
