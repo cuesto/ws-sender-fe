@@ -36,28 +36,28 @@
             <v-btn
               :loading="loadingSendBtn"
               :disabled="disableSendBtn"
-              color="green"
+              color="orange"
               class="ma-2 white--text"
-              @click="sendWSMessage"
+              @click="showMessageModal"
             >
               Mensaje Prueba
-              <v-icon right dark> mdi-send</v-icon>
+              <v-icon right dark>mdi-test-tube</v-icon>
             </v-btn>
             <v-btn
               :loading="loadingSendBtn"
               :disabled="disableSendBtn"
               color="green"
               class="ma-2 white--text"
-              @click="sendWSMessage"
+              @click="sendWSMassiveMessage"
             >
               Enviar Mensaje
-              <v-icon right dark> mdi-send</v-icon>
+              <v-icon right dark>mdi-send</v-icon>
             </v-btn>
           </v-toolbar>
         </template>
       </v-data-table>
     </v-flex>
-    <v-dialog v-model="uploadModal" max-width="500px">
+    <v-dialog v-model="uploadModal" max-width="200px">
       <v-card>
         <v-card-text>
           <template>
@@ -76,17 +76,66 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="messageModal" persistent max-width="600px">
+      <v-form ref="form">
+        <v-card>
+          <v-card-title>
+            <span class="headline">Mensaje de Prueba</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <v-col cols="12" sm="12" md="12">
+                  <v-text-field
+                    label="Celular"
+                    hint="8094445555"
+                    v-mask="mask"
+                    :rules="[rules.required]"
+                    append-icon="mdi-phone"
+                    v-model="messageModel.phone"
+                    single-line
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="12" md="12">
+                  <v-textarea
+                    label="Mensaje"
+                    hint="Insertar mensaje"
+                    :rules="[rules.required]"
+                    append-icon="mdi-comment-text"
+                    v-model="messageModel.message"
+                  ></v-textarea>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" text @click="closeMessageModal()"
+              >Cerrar</v-btn
+            >
+            <v-btn color="blue darken-1" text @click="sendWSSingleMessage">
+              Enviar<v-icon right dark>mdi-send</v-icon>
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-form>
+    </v-dialog>
   </v-layout>
 </template>
 
 <script>
 import Papa from "papaparse";
-import InventoryItemModel from "../models/InventoryItemModel";
+import MessageModel from "../models/MessageModel";
 import axios from "axios";
+import { mask } from "vue-the-mask";
 
 export default {
   components: {},
+  directives: {
+    mask,
+  },
   data: () => ({
+    mask: "##########",
     headers: [
       { text: "Codigo", sortable: true, value: "code" },
       { text: "Nombre", sortable: true, value: "name" },
@@ -96,7 +145,7 @@ export default {
     code: "",
     name: "",
     search: "",
-    inventoryItemModel: new InventoryItemModel(),
+    messageModel: new MessageModel(),
     loadingUploadBtn: false,
     disableUploadBtn: false,
     loadingSendBtn: false,
@@ -104,11 +153,23 @@ export default {
     fileProcessed: null,
     file: null,
     uploadModal: false,
+    messageModal: false,
+    rules: {
+      required: (value) => !!value || "Requerido.",
+    },
+    url: null,
   }),
-  watch: {},
+  watch: {
+    messageModal(val) {
+      val || this.closeMessageModal();
+      if (this.$refs.form != undefined) this.$refs.form.resetValidation();
+    },
+  },
   mounted() {},
   created() {
-    //this.getClients();
+    if (this.$store.state.userProfile) {
+      this.url = this.$store.state.userProfile.server;
+    }
   },
   methods: {
     displayNotification(type, message) {
@@ -120,20 +181,6 @@ export default {
         timer: 1000,
       });
     },
-
-    // getClients() {
-    //   console.log("getClients");
-    //   //https://sheets.googleapis.com/v4/spreadsheets/1D7Xt6sK2we1z6mdxjLssCUgyGLJRlmHeOaZEYhe2BLU/values/Clientes-Limpio!A:C?key=AIzaSyCVWCtIuxgTA8GLfOJYz9PwDgBeBIE5fPQ
-    //   axios
-    //     .get("https://sheets.googleapis.com/v4/spreadsheets/1D7Xt6sK2we1z6mdxjLssCUgyGLJRlmHeOaZEYhe2BLU/values/Clientes-Limpio!A:C?key=AIzaSyCVWCtIuxgTA8GLfOJYz9PwDgBeBIE5fPQ")
-    //     .then((response) => {
-    //       //this.items = response.data;
-    //       console.log(response.data);
-    //     })
-    //     .catch((error) => {
-    //       console.log(error);
-    //     });
-    // },
 
     UploadClientsTemplate() {
       if (this.file == null) {
@@ -198,7 +245,32 @@ export default {
       this.uploadModal = true;
     },
 
-    async sendWSMessage() {
+    async showMessageModal() {
+      this.messageModal = true;
+    },
+
+    async sendWSSingleMessage() {
+      this.disableSendBtn = true;
+      let me = this;
+
+      console.log(this.messageModel);
+      console.log(me.url);
+      axios
+        .post(me.url + "/send-message", {
+          number: "1" + me.messageModel.phone,
+          message: me.messageModel.message,
+        })
+        .then(function (response) {
+          me.closeMessageModal();
+          me.displayNotification("success", "Se envió el mensaje.");
+        })
+        .catch(function (error) {
+          me.displayNotification("error", error.message);
+        });
+      this.disableSendBtn = false;
+    },
+
+    async sendWSMassiveMessage() {
       this.disableSendBtn = true;
       this.items.forEach((a) => {
         let message = this.prepareSendWSMessage(a.name);
@@ -212,24 +284,29 @@ export default {
         "Se envió el mensaje a los clientes."
       );
       this.disableSendBtn = false;
-      //await axios.post("/send-message", { number: number, message: message });
     },
 
     prepareSendWSMessage(name) {
       let message =
-      "Este mes celebramos a nuestros superhéroes🦸🏻‍♂️ favoritos... ¡Los padres!👨‍👧‍👦💛 Pide tus regalos para papá y tráelo con Domex porque este verano te damos un 22% OFF en flete de 7 libras o más.🙌🏻 \n\n"
-      +"Quedan pocos días,🕑 no esperes más... ¡Papá se merece todo en este verano!🌴😉 \n\n"
-      +"https://www.instagram.com/p/CgPu9YEpQEZ/"
-      /*  "¡Hola " +
+        //"Este mes celebramos a nuestros superhéroes🦸🏻‍♂️ favoritos... ¡Los padres!👨‍👧‍👦💛 Pide tus regalos para papá y tráelo con Domex porque este verano te damos un 22% OFF en flete de 7 libras o más.🙌🏻 \n\n" +
+        "Quedan pocos días,🕑 no esperes más... ¡Papá se merece todo en este verano!🌴😉 \n\n" +
+        "https://www.instagram.com/p/CgPu9YEpQEZ/";
+      "¡Hola " +
         name +
         "!, Te escribimos de *Domex Herrera* para informarte que tu(s) paquete(s) está(n) disponible(s).\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio *GRATIS* o puede pasarlo a retirar por la sucursal.";
-      */
       return message;
     },
 
     hideUploadModal() {
       this.uploadModal = false;
       this.file = null;
+    },
+
+    closeMessageModal() {
+      this.messageModal = false;
+      setTimeout(() => {
+        this.messageModel = Object.assign({}, this.defaultItem);
+      }, 300);
     },
   },
 };
