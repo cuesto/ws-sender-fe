@@ -7,7 +7,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    userProfile: {}
+    userProfile: null
   },
   mutations: {
     setUserProfile(state, val) {
@@ -18,7 +18,6 @@ export default new Vuex.Store({
     async login({ dispatch }, form) {
       // sign user in
       const { user } = await fb.auth.signInWithEmailAndPassword(form.email, form.password)
-      console.log(user);
       // fetch user profile and set in state
       dispatch('fetchUserProfile', user)
     },
@@ -29,8 +28,8 @@ export default new Vuex.Store({
     
       // create user profile object in userCollections
       await fb.usersCollection.doc(user.uid).set({
-        name: form.name//,
-        //title: form.title
+        name: form.name,
+        server: form.server
       })
     
       // fetch user profile and set in state
@@ -46,7 +45,21 @@ export default new Vuex.Store({
 
       // change route to dashboard
       router.push('/')
-    }
+    },
+
+   async logout() {
+       await  fb
+        .auth()
+        .signOut()
+        .then(() => {
+          alert('Successfully logged out');
+          router.push('/');
+        })
+        .catch(error => {
+          alert(error.message);
+          router.push('/');
+        });
+    },
   },
   modules: {
   }

@@ -5,7 +5,7 @@
         <v-col cols="12" sm="8" md="4">
           <v-card class="elevation-12">
             <v-toolbar color="primary" dark flat>
-              <v-toolbar-title>Inventory Management Tool</v-toolbar-title>
+              <v-toolbar-title>WhatsApp Send Msg</v-toolbar-title>
               <div class="flex-grow-1"></div>
             </v-toolbar>
             <v-card-text>
@@ -33,9 +33,9 @@
                   <v-flex class="red--text" v-if="error">{{ error }}</v-flex>
                   <v-btn color="primary" @click="login">Ingresar</v-btn>
                   <div class="extras">
-                    <a @click="togglePasswordReset()">Olvidar Contraseña</a>
                     <v-spacer></v-spacer>
-                    <a @click="toggleForm()">Crear una cuenta</a>
+                    <!-- Activate if need to create new account -->
+                    <!-- <a @click="toggleForm()">Crear una cuenta</a> -->
                   </div>
                 </form>
                 <form v-else @submit.prevent>
@@ -65,6 +65,14 @@
                     type="password"
                     :rules="[rules.required]"
                   ></v-text-field>
+                  <v-text-field
+                    v-model.trim="signupForm.server"
+                    label="Servidor"
+                    name="server"
+                    prepend-icon="Storage"
+                    type="text"
+                    :rules="[rules.required]"
+                  ></v-text-field>
                   <v-flex class="red--text" v-if="error">{{ error }}</v-flex>
                   <v-btn color="primary" @click="signup">Registrar</v-btn>
 
@@ -86,13 +94,14 @@ import axios from "axios";
 export default {
   data: () => ({
     loginForm: {
-      email: "",
-      password: "",
+      email: "",//"jcuesto@domex.com.do",
+      password: ""//"123456",
     },
     signupForm: {
       name: "",
       email: "",
       password: "",
+      server: ""
     },
     showLoginForm: true,
     rules: {
@@ -114,14 +123,16 @@ export default {
         email: this.loginForm.email,
         password: this.loginForm.password,
       });
-      //this.$router.push({ name: "home" });
+      this.$router.push({ name: "Home" });
     },
     signup() {
       this.$store.dispatch("signup", {
         email: this.signupForm.email,
         password: this.signupForm.password,
         name: this.signupForm.name,
+        server: this.signupForm.server
       });
+      this.$router.push({ name: "login" });
     },
   },
 };
