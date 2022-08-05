@@ -26,6 +26,38 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+    
+    - name: 🚚 Upgrade NPM
+      run: npm install -g npm
+    
+    - name: 📦 Cache dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.npm
+        key: npm-${{ hashFiles('package-lock.json') }}
+        restore-keys: npm-
+    
+    - name: 💥 Install Dependencies
+      run: npm ci
+
+    - name: 🧹 Linting
+      run: npm run lint
+        
+    - name: 🕵️ Unit Tests
+      run: npm run test
+
+    - name: 🔨 Build Project
+      run: npm run build
+    
+    - name: 🖼️ Build Storybook
+      run: npm run storybook:build
+
+    - name: 🧪 Integration Tests
+      run: npm run test:ci
+    
+    # Save videos and screenshots as test artifacts (https://github.com/actions/upload-artifact)
+    - uses: actions/upload-artifact@v2
+      with:
+        name: screenshots
+        path: cypress/screenshots
+        if: failure() # Only upload screenshots if previous step has failed (i.e. if there are test failures)
