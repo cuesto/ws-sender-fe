@@ -73,7 +73,7 @@
                   <v-icon right dark>mdi-send</v-icon>
                 </v-btn>
               </template>
-              <span>{{toolTipMassive}}</span>
+              <span>{{ toolTipMassive }}</span>
             </v-tooltip>
           </v-toolbar>
         </template>
@@ -162,6 +162,7 @@ export default {
       { text: "Codigo", sortable: true, value: "code" },
       { text: "Nombre", sortable: true, value: "name" },
       { text: "Celular", sortable: true, value: "phone" },
+      { text: "Estatus", sortable: true, value: "status" },
     ],
     items: [],
     code: "",
@@ -182,7 +183,7 @@ export default {
       required: (value) => !!value || "Requerido.",
     },
     url: null,
-    toolTipMassive: 'Debe subir una plantilla'
+    toolTipMassive: "Debe subir una plantilla",
   }),
   watch: {
     messageModal(val) {
@@ -190,7 +191,7 @@ export default {
       if (this.$refs.form != undefined) this.$refs.form.resetValidation();
     },
     items(val) {
-      this.toolTipMassive = "Enviar mensaje masivo a clientes."
+      this.toolTipMassive = "Enviar mensaje masivo a clientes.";
     },
   },
   mounted() {},
@@ -206,7 +207,7 @@ export default {
         type: type,
         title: message,
         showConfirmButton: false,
-        timer: 1000,
+        timer: 2000,
       });
     },
 
@@ -274,7 +275,8 @@ export default {
     },
 
     async sendWSSingleMessage() {
-      this.disableSendBtn = true;
+      this.disableSendSingleBtn = true;
+      this.loadingSendSingleBtn = true;
       let me = this;
 
       axios
@@ -289,11 +291,24 @@ export default {
         .catch(function (error) {
           me.displayNotification("error", error.message);
         });
-      this.disableSendBtn = false;
+      this.disableSendSingleBtn = false;
+      this.loadingSendSingleBtn = false;
     },
 
     async sendWSMassiveMessage() {
       this.disableSendBtn = true;
+      this.loadingSendBtn = true;
+
+      if (this.items.length == 0) {
+        this.displayNotification(
+          "info",
+          "Debe cargar una plantilla para poder enviar mensajes."
+        );
+        this.disableSendBtn = false;
+        this.loadingSendBtn = false;
+        return;
+      }
+
       this.items.forEach((a) => {
         let message = this.prepareSendWSMessage(a.name);
         axios.post("/send-message", {
@@ -301,11 +316,12 @@ export default {
           message: message,
         });
       });
-      this.displayNotification(
-        "success",
-        "Se envió el mensaje a los clientes."
-      );
+      // this.displayNotification(
+      //   "success",
+      //   "Se envió el mensaje a los clientes."
+      // );
       this.disableSendBtn = false;
+      this.loadingSendBtn = false;
     },
 
     prepareSendWSMessage(name) {
