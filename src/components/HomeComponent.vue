@@ -77,6 +77,24 @@
             </v-tooltip>
           </v-toolbar>
         </template>
+        <template v-slot:item.options="{ item }">
+          <v-icon
+            size="sm"
+            variant="outline-info"
+            color="green"
+            class="mr-1"
+            v-if="item.isSent"
+            >done</v-icon
+          >
+          <v-icon
+            size="sm"
+            variant="outline-info"
+            color="red"
+            class="mr-1"
+            v-if="item.hasError"
+            >mdi-alert-circle-outline</v-icon
+          >
+        </template>
       </v-data-table>
     </v-flex>
     <v-dialog v-model="uploadModal" max-width="500px">
@@ -102,7 +120,7 @@
       <v-form ref="form">
         <v-card>
           <v-card-title>
-            <span class="headline">{{headerModalMessage}}</span>
+            <span class="headline">{{ headerModalMessage }}</span>
           </v-card-title>
           <v-card-text>
             <v-container>
@@ -122,7 +140,7 @@
                 <v-col cols="12" sm="12" md="12">
                   <v-textarea
                     label="Mensaje"
-                    :hint=hintMessage
+                    :hint="hintMessage"
                     :rules="[rules.required]"
                     append-icon="mdi-comment-text"
                     v-model="messageModel.message"
@@ -136,7 +154,7 @@
             <v-btn color="blue darken-1" text @click="closeMessageModal()"
               >Cerrar</v-btn
             >
-            <v-btn color="blue darken-1" text @click="sendWSSingleMessage">
+            <v-btn color="blue darken-1" text @click="sendMessage">
               Enviar<v-icon right dark>mdi-send</v-icon>
             </v-btn>
           </v-card-actions>
@@ -163,7 +181,7 @@ export default {
       { text: "Codigo", sortable: true, value: "code" },
       { text: "Nombre", sortable: true, value: "name" },
       { text: "Celular", sortable: true, value: "phone" },
-      { text: "Estatus", sortable: true, value: "status" },
+      { text: "Estatus", sortable: true, value: "options" },
     ],
     items: [],
     code: "",
@@ -187,7 +205,8 @@ export default {
     toolTipMassive: "Debe subir una plantilla",
     showPhoneOnModal: true,
     headerModalMessage: "",
-    hintMessage:"",
+    hintMessage: "",
+    dataTableKey: false,
   }),
   watch: {
     messageModal(val) {
@@ -275,84 +294,108 @@ export default {
     },
 
     async showMessageSingleModal() {
-      this.headerModalMessage = "Mensaje de Prueba"
+      this.headerModalMessage = "Mensaje de Prueba";
       this.hintMessage = "Insertar texto.";
       this.showPhoneOnModal = true;
       this.messageModal = true;
     },
 
     async showMessageModal() {
-      
-        // if (this.items.length == 0) {
-        //   this.displayNotification(
-        //     "info",
-        //     "Debe cargar una plantilla para poder enviar mensajes."
-        //   );
-        //   return;
-        // }
-        this.headerModalMessage = "Mensaje Masivo"
-        this.hintMessage = "Lo que está dentro de llaves {} debe ser un campo de la tabla";
-        this.showPhoneOnModal = false;
-        this.messageModal = true;
-        this.messageModel.message = "¡Hola {nombre} 👋🏻!, Te escribimos de *Domex Herrera*📦 para informarte que tu(s) paquete(s) está(n) disponible(s)🎉.\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio 🚚 *GRATIS* o puede pasarlo a retirar por la sucursal 🙌🏻.";
-      
+      if (this.items.length == 0) {
+        this.displayNotification(
+          "info",
+          "Debe cargar una plantilla para poder enviar mensajes."
+        );
+        return;
+      }
+      this.headerModalMessage = "Mensaje Masivo";
+      this.hintMessage =
+        "Lo que está dentro de llaves {} debe ser un campo de la tabla";
+      this.showPhoneOnModal = false;
+      this.messageModal = true;
+      this.messageModel.message =
+        "¡Hola {nombre} 👋🏻!, Te escribimos de *Domex Herrera*📦 para informarte que tu(s) paquete(s) está(n) disponible(s)🎉.\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio 🚚 *GRATIS* o puede pasarlo a retirar por la sucursal 🙌🏻.";
     },
 
-    async sendWSSingleMessage() {
+    sendMessage() {
       if (this.$refs.form.validate()) {
-        this.disableSendSingleBtn = true;
-        this.loadingSendSingleBtn = true;
-        let me = this;
-
-        await axios
-          .post(me.url + "/send-message", {
-            number: "1" + me.messageModel.phone,
-            message: me.messageModel.message,
+        this.$swal
+          .fire({
+            title: "¿Está Seguro de enviar este mensaje?",
+            text: "¡No será posible revertir el cambio!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            confirmButtonText: "¡Enviar!",
+            cancelButtonText: "Cancelar",
           })
-          .then(function (response) {
-            me.closeMessageModal();
-            me.displayNotification("success", "Se envió el mensaje.");
-          })
-          .catch(function (error) {
-            me.displayNotification(
-              "error",
-              "Verifique la configuración del servidor o el número de telefono."
-            );
+          .then((result) => {
+            if (result.value) {
+              if (this.showPhoneOnModal == true) {
+                this.sendWSSingleMessage();
+              } else {
+                this.sendWSMassiveMessage();
+              }
+              this.closeMessageModal();
+            }
           });
-        this.disableSendSingleBtn = false;
-        this.loadingSendSingleBtn = false;
-        this.closeMessageModal();
       }
     },
 
-    async sendWSMassiveMessage() {
+    async sendWSSingleMessage() {
+      this.disableSendSingleBtn = true;
+      this.loadingSendSingleBtn = true;
+      let me = this;
+
+      await axios
+        .post(me.url + "/send-message", {
+          number: "1" + me.messageModel.phone,
+          message: me.messageModel.message,
+        })
+        .then(function (response) {
+          me.displayNotification("success", "Se envió el mensaje.");
+        })
+        .catch(function (error) {
+          me.displayNotification(
+            "error",
+            "Verifique la configuración del servidor o el número de telefono."
+          );
+        });
+      this.disableSendSingleBtn = false;
+      this.loadingSendSingleBtn = false;
+    },
+
+    sendWSMassiveMessage() {
       this.disableSendBtn = true;
       this.loadingSendBtn = true;
+      let me = this;
 
       this.items.forEach((a) => {
-        let message = this.prepareSendWSMessage(a.name);
-        axios.post("/send-message", {
-          number: "1" + a.phone,
-          message: message,
-        });
+        var message = me.prepareSendWSMessage(a.name);
+
+        axios
+          .post(me.url + "/send-message", {
+            number: "1" + a.phone,
+            message: message,
+          })
+          .then(function (response) {
+            a.isSent = true;
+          })
+          .catch(function (error) {
+            a.hasError = true;
+            console.log(error);
+          });
       });
-      // this.displayNotification(
-      //   "success",
-      //   "Se envió el mensaje a los clientes."
-      // );
+
       this.disableSendBtn = false;
       this.loadingSendBtn = false;
     },
 
     prepareSendWSMessage(name) {
-      let message =
-        //"Este mes celebramos a nuestros superhéroes🦸🏻‍♂️ favoritos... ¡Los padres!👨‍👧‍👦💛 Pide tus regalos para papá y tráelo con Domex porque este verano te damos un 22% OFF en flete de 7 libras o más.🙌🏻 \n\n" +
-        "Quedan pocos días,🕑 no esperes más... ¡Papá se merece todo en este verano!🌴😉 \n\n" +
-        "https://www.instagram.com/p/CgPu9YEpQEZ/";
-      "¡Hola " +
-        name +
-        "!, Te escribimos de *Domex Herrera* para informarte que tu(s) paquete(s) está(n) disponible(s).\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio *GRATIS* o puede pasarlo a retirar por la sucursal.";
-      return message;
+      let message = this.messageModel.message;
+      let newMessage = message.replace("{nombre}", name);
+      console.log(newMessage);
+      return newMessage;
     },
 
     hideUploadModal() {
