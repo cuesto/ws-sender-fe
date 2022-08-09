@@ -122,7 +122,7 @@
                 <v-col cols="12" sm="12" md="12">
                   <v-textarea
                     label="Mensaje"
-                    hint="Lo que está dentro de llaves {} debe ser un campo de la tabla"
+                    :hint=hintMessage
                     :rules="[rules.required]"
                     append-icon="mdi-comment-text"
                     v-model="messageModel.message"
@@ -187,6 +187,7 @@ export default {
     toolTipMassive: "Debe subir una plantilla",
     showPhoneOnModal: true,
     headerModalMessage: "",
+    hintMessage:"",
   }),
   watch: {
     messageModal(val) {
@@ -275,6 +276,7 @@ export default {
 
     async showMessageSingleModal() {
       this.headerModalMessage = "Mensaje de Prueba"
+      this.hintMessage = "Insertar texto.";
       this.showPhoneOnModal = true;
       this.messageModal = true;
     },
@@ -289,6 +291,7 @@ export default {
         //   return;
         // }
         this.headerModalMessage = "Mensaje Masivo"
+        this.hintMessage = "Lo que está dentro de llaves {} debe ser un campo de la tabla";
         this.showPhoneOnModal = false;
         this.messageModal = true;
         this.messageModel.message = "¡Hola {nombre} 👋🏻!, Te escribimos de *Domex Herrera*📦 para informarte que tu(s) paquete(s) está(n) disponible(s)🎉.\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio 🚚 *GRATIS* o puede pasarlo a retirar por la sucursal 🙌🏻.";
