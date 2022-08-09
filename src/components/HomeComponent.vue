@@ -53,7 +53,7 @@
               :disabled="disableSendSingleBtn"
               color="orange"
               class="ma-2 white--text"
-              @click="showMessageModal"
+              @click="showMessageSingleModal"
             >
               Mensaje Prueba
               <v-icon right dark>mdi-test-tube</v-icon>
@@ -67,7 +67,7 @@
                   :disabled="disableSendBtn"
                   color="green"
                   class="ma-2 white--text"
-                  @click="sendWSMassiveMessage"
+                  @click="showMessageModal"
                 >
                   Enviar Masivo
                   <v-icon right dark>mdi-send</v-icon>
@@ -102,7 +102,7 @@
       <v-form ref="form">
         <v-card>
           <v-card-title>
-            <span class="headline">Mensaje de Prueba</span>
+            <span class="headline">{{headerModalMessage}}</span>
           </v-card-title>
           <v-card-text>
             <v-container>
@@ -122,7 +122,7 @@
                 <v-col cols="12" sm="12" md="12">
                   <v-textarea
                     label="Mensaje"
-                    hint="Insertar mensaje"
+                    hint="Lo que está dentro de llaves {} debe ser un campo de la tabla"
                     :rules="[rules.required]"
                     append-icon="mdi-comment-text"
                     v-model="messageModel.message"
@@ -185,7 +185,8 @@ export default {
     },
     url: null,
     toolTipMassive: "Debe subir una plantilla",
-    showPhoneOnModal: false,
+    showPhoneOnModal: true,
+    headerModalMessage: "",
   }),
   watch: {
     messageModal(val) {
@@ -209,7 +210,7 @@ export default {
         type: type,
         title: message,
         showConfirmButton: false,
-        timer: 2000,
+        timer: 2500,
       });
     },
 
@@ -272,8 +273,26 @@ export default {
       this.uploadModal = true;
     },
 
-    async showMessageModal() {
+    async showMessageSingleModal() {
+      this.headerModalMessage = "Mensaje de Prueba"
+      this.showPhoneOnModal = true;
       this.messageModal = true;
+    },
+
+    async showMessageModal() {
+      
+        // if (this.items.length == 0) {
+        //   this.displayNotification(
+        //     "info",
+        //     "Debe cargar una plantilla para poder enviar mensajes."
+        //   );
+        //   return;
+        // }
+        this.headerModalMessage = "Mensaje Masivo"
+        this.showPhoneOnModal = false;
+        this.messageModal = true;
+        this.messageModel.message = "¡Hola {nombre} 👋🏻!, Te escribimos de *Domex Herrera*📦 para informarte que tu(s) paquete(s) está(n) disponible(s)🎉.\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio 🚚 *GRATIS* o puede pasarlo a retirar por la sucursal 🙌🏻.";
+      
     },
 
     async sendWSSingleMessage() {
@@ -292,7 +311,10 @@ export default {
             me.displayNotification("success", "Se envió el mensaje.");
           })
           .catch(function (error) {
-            me.displayNotification("error", "Verifique la configuración del servidor o el número de telefono.");
+            me.displayNotification(
+              "error",
+              "Verifique la configuración del servidor o el número de telefono."
+            );
           });
         this.disableSendSingleBtn = false;
         this.loadingSendSingleBtn = false;
@@ -303,16 +325,6 @@ export default {
     async sendWSMassiveMessage() {
       this.disableSendBtn = true;
       this.loadingSendBtn = true;
-
-      if (this.items.length == 0) {
-        this.displayNotification(
-          "info",
-          "Debe cargar una plantilla para poder enviar mensajes."
-        );
-        this.disableSendBtn = false;
-        this.loadingSendBtn = false;
-        return;
-      }
 
       this.items.forEach((a) => {
         let message = this.prepareSendWSMessage(a.name);
