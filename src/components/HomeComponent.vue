@@ -109,6 +109,7 @@
               <v-row>
                 <v-col cols="12" sm="12" md="12">
                   <v-text-field
+                    v-if="showPhoneOnModal"
                     label="Celular"
                     hint="8094445555"
                     v-mask="mask"
@@ -184,6 +185,7 @@ export default {
     },
     url: null,
     toolTipMassive: "Debe subir una plantilla",
+    showPhoneOnModal: false,
   }),
   watch: {
     messageModal(val) {
@@ -275,24 +277,27 @@ export default {
     },
 
     async sendWSSingleMessage() {
-      this.disableSendSingleBtn = true;
-      this.loadingSendSingleBtn = true;
-      let me = this;
+      if (this.$refs.form.validate()) {
+        this.disableSendSingleBtn = true;
+        this.loadingSendSingleBtn = true;
+        let me = this;
 
-      axios
-        .post(me.url + "/send-message", {
-          number: "1" + me.messageModel.phone,
-          message: me.messageModel.message,
-        })
-        .then(function (response) {
-          me.closeMessageModal();
-          me.displayNotification("success", "Se envió el mensaje.");
-        })
-        .catch(function (error) {
-          me.displayNotification("error", error.message);
-        });
-      this.disableSendSingleBtn = false;
-      this.loadingSendSingleBtn = false;
+        await axios
+          .post(me.url + "/send-message", {
+            number: "1" + me.messageModel.phone,
+            message: me.messageModel.message,
+          })
+          .then(function (response) {
+            me.closeMessageModal();
+            me.displayNotification("success", "Se envió el mensaje.");
+          })
+          .catch(function (error) {
+            me.displayNotification("error", "Verifique la configuración del servidor o el número de telefono.");
+          });
+        this.disableSendSingleBtn = false;
+        this.loadingSendSingleBtn = false;
+        this.closeMessageModal();
+      }
     },
 
     async sendWSMassiveMessage() {
