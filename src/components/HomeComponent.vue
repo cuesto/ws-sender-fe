@@ -32,7 +32,7 @@
                   href="template.csv"
                   dark
                   download
-                  >
+                >
                   <v-icon dark> mdi-cloud-download </v-icon>
                 </v-btn>
               </template>
@@ -49,26 +49,51 @@
             ></v-text-field>
             <v-spacer></v-spacer>
             <v-btn
-              :loading="loadingSendBtn"
-              :disabled="disableSendBtn"
+              :loading="loadingSendSingleBtn"
+              :disabled="disableSendSingleBtn"
               color="orange"
               class="ma-2 white--text"
-              @click="showMessageModal"
+              @click="showMessageSingleModal"
             >
               Mensaje Prueba
               <v-icon right dark>mdi-test-tube</v-icon>
             </v-btn>
-            <v-btn
-              :loading="loadingSendBtn"
-              :disabled="disableSendBtn"
-              color="green"
-              class="ma-2 white--text"
-              @click="sendWSMassiveMessage"
-            >
-              Enviar Mensaje
-              <v-icon right dark>mdi-send</v-icon>
-            </v-btn>
+            <v-tooltip top>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  v-bind="attrs"
+                  v-on="on"
+                  :loading="loadingSendBtn"
+                  :disabled="disableSendBtn"
+                  color="green"
+                  class="ma-2 white--text"
+                  @click="showMessageModal"
+                >
+                  Enviar Masivo
+                  <v-icon right dark>mdi-send</v-icon>
+                </v-btn>
+              </template>
+              <span>{{ toolTipMassive }}</span>
+            </v-tooltip>
           </v-toolbar>
+        </template>
+        <template v-slot:item.options="{ item }">
+          <v-icon
+            size="sm"
+            variant="outline-info"
+            color="green"
+            class="mr-1"
+            v-if="item.isSent"
+            >done</v-icon
+          >
+          <v-icon
+            size="sm"
+            variant="outline-info"
+            color="red"
+            class="mr-1"
+            v-if="item.hasError"
+            >mdi-alert-circle-outline</v-icon
+          >
         </template>
       </v-data-table>
     </v-flex>
@@ -95,13 +120,14 @@
       <v-form ref="form">
         <v-card>
           <v-card-title>
-            <span class="headline">Mensaje de Prueba</span>
+            <span class="headline">{{ headerModalMessage }}</span>
           </v-card-title>
           <v-card-text>
             <v-container>
               <v-row>
                 <v-col cols="12" sm="12" md="12">
                   <v-text-field
+                    v-if="showPhoneOnModal"
                     label="Celular"
                     hint="8094445555"
                     v-mask="mask"
@@ -114,7 +140,7 @@
                 <v-col cols="12" sm="12" md="12">
                   <v-textarea
                     label="Mensaje"
-                    hint="Insertar mensaje"
+                    :hint="hintMessage"
                     :rules="[rules.required]"
                     append-icon="mdi-comment-text"
                     v-model="messageModel.message"
@@ -128,7 +154,7 @@
             <v-btn color="blue darken-1" text @click="closeMessageModal()"
               >Cerrar</v-btn
             >
-            <v-btn color="blue darken-1" text @click="sendWSSingleMessage">
+            <v-btn color="blue darken-1" text @click="sendMessage">
               Enviar<v-icon right dark>mdi-send</v-icon>
             </v-btn>
           </v-card-actions>
@@ -155,6 +181,7 @@ export default {
       { text: "Codigo", sortable: true, value: "code" },
       { text: "Nombre", sortable: true, value: "name" },
       { text: "Celular", sortable: true, value: "phone" },
+      { text: "Estatus", sortable: true, value: "options" },
     ],
     items: [],
     code: "",
@@ -165,6 +192,8 @@ export default {
     disableUploadBtn: false,
     loadingSendBtn: false,
     disableSendBtn: false,
+    loadingSendSingleBtn: false,
+    disableSendSingleBtn: false,
     fileProcessed: null,
     file: null,
     uploadModal: false,
@@ -173,11 +202,19 @@ export default {
       required: (value) => !!value || "Requerido.",
     },
     url: null,
+    toolTipMassive: "Debe subir una plantilla",
+    showPhoneOnModal: true,
+    headerModalMessage: "",
+    hintMessage: "",
+    dataTableKey: false,
   }),
   watch: {
     messageModal(val) {
       val || this.closeMessageModal();
       if (this.$refs.form != undefined) this.$refs.form.resetValidation();
+    },
+    items(val) {
+      this.toolTipMassive = "Enviar mensaje masivo a clientes.";
     },
   },
   mounted() {},
@@ -193,13 +230,12 @@ export default {
         type: type,
         title: message,
         showConfirmButton: false,
-        timer: 1000,
+        timer: 2500,
       });
     },
 
     UploadClientsTemplate() {
       if (this.file == null) {
-        //alert("El archivo es de un formato incorrecto o no se ha cargado.");
         this.displayNotification(
           "error",
           "El archivo es de un formato incorrecto o no se ha cargado."
@@ -232,9 +268,6 @@ export default {
           );
 
           if (customersList.length == 0) {
-            // alert(
-            //   "No se pudo procesar el archivo, revise el formato o los datos."
-            // );
             me.displayNotification(
               "error",
               "No se pudo procesar el archivo, revise el formato."
@@ -242,8 +275,8 @@ export default {
             return;
           }
 
+          me.file = null;
           me.uploadModal = false;
-          //alert(".Se cargaron los registros correctamente");
           me.displayNotification(
             "success",
             "Se cargaron los registros correctamente."
@@ -260,56 +293,109 @@ export default {
       this.uploadModal = true;
     },
 
-    async showMessageModal() {
+    async showMessageSingleModal() {
+      this.headerModalMessage = "Mensaje de Prueba";
+      this.hintMessage = "Insertar texto.";
+      this.showPhoneOnModal = true;
       this.messageModal = true;
     },
 
+    async showMessageModal() {
+      if (this.items.length == 0) {
+        this.displayNotification(
+          "info",
+          "Debe cargar una plantilla para poder enviar mensajes."
+        );
+        return;
+      }
+      this.headerModalMessage = "Mensaje Masivo";
+      this.hintMessage =
+        "Lo que está dentro de llaves {} debe ser un campo de la tabla";
+      this.showPhoneOnModal = false;
+      this.messageModal = true;
+      this.messageModel.message =
+        "¡Hola {nombre} 👋🏻!, Te escribimos de *Domex Herrera*📦 para informarte que tu(s) paquete(s) está(n) disponible(s)🎉.\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio 🚚 *GRATIS* o puede pasarlo a retirar por la sucursal 🙌🏻.";
+    },
+
+    sendMessage() {
+      if (this.$refs.form.validate()) {
+        this.$swal
+          .fire({
+            title: "¿Está Seguro de enviar este mensaje?",
+            text: "¡No será posible revertir el cambio!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            confirmButtonText: "¡Enviar!",
+            cancelButtonText: "Cancelar",
+          })
+          .then((result) => {
+            if (result.value) {
+              if (this.showPhoneOnModal == true) {
+                this.sendWSSingleMessage();
+              } else {
+                this.sendWSMassiveMessage();
+              }
+              this.closeMessageModal();
+            }
+          });
+      }
+    },
+
     async sendWSSingleMessage() {
-      this.disableSendBtn = true;
+      this.disableSendSingleBtn = true;
+      this.loadingSendSingleBtn = true;
       let me = this;
 
-      console.log(this.messageModel);
-      console.log(me.url);
-      axios
+      await axios
         .post(me.url + "/send-message", {
           number: "1" + me.messageModel.phone,
           message: me.messageModel.message,
         })
         .then(function (response) {
-          me.closeMessageModal();
           me.displayNotification("success", "Se envió el mensaje.");
         })
         .catch(function (error) {
-          me.displayNotification("error", error.message);
+          me.displayNotification(
+            "error",
+            "Verifique la configuración del servidor o el número de telefono."
+          );
         });
-      this.disableSendBtn = false;
+      this.disableSendSingleBtn = false;
+      this.loadingSendSingleBtn = false;
     },
 
-    async sendWSMassiveMessage() {
+    sendWSMassiveMessage() {
       this.disableSendBtn = true;
+      this.loadingSendBtn = true;
+      let me = this;
+
       this.items.forEach((a) => {
-        let message = this.prepareSendWSMessage(a.name);
-        axios.post("/send-message", {
-          number: "1" + a.phone,
-          message: message,
-        });
+        var message = me.prepareSendWSMessage(a.name);
+
+        axios
+          .post(me.url + "/send-message", {
+            number: "1" + a.phone,
+            message: message,
+          })
+          .then(function (response) {
+            a.isSent = true;
+          })
+          .catch(function (error) {
+            a.hasError = true;
+            console.log(error);
+          });
       });
-      this.displayNotification(
-        "success",
-        "Se envió el mensaje a los clientes."
-      );
+
       this.disableSendBtn = false;
+      this.loadingSendBtn = false;
     },
 
     prepareSendWSMessage(name) {
-      let message =
-        //"Este mes celebramos a nuestros superhéroes🦸🏻‍♂️ favoritos... ¡Los padres!👨‍👧‍👦💛 Pide tus regalos para papá y tráelo con Domex porque este verano te damos un 22% OFF en flete de 7 libras o más.🙌🏻 \n\n" +
-        "Quedan pocos días,🕑 no esperes más... ¡Papá se merece todo en este verano!🌴😉 \n\n" +
-        "https://www.instagram.com/p/CgPu9YEpQEZ/";
-      "¡Hola " +
-        name +
-        "!, Te escribimos de *Domex Herrera* para informarte que tu(s) paquete(s) está(n) disponible(s).\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio *GRATIS* o puede pasarlo a retirar por la sucursal.";
-      return message;
+      let message = this.messageModel.message;
+      let newMessage = message.replace("{nombre}", name);
+      console.log(newMessage);
+      return newMessage;
     },
 
     hideUploadModal() {
