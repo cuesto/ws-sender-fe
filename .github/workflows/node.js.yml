@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x]
+        node-version: [12.x, 14.x, 16.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -46,8 +46,8 @@ jobs:
     # - name: 🕵️ Unit Tests
     #   run: npm run test
 
-    - name: 🔨 Build Project
-      run: npm run build
+    # - name: 🔨 Build Project
+    #   run: npm run build
     
     # - name: 🖼️ Build Storybook
     #   run: npm run storybook:build

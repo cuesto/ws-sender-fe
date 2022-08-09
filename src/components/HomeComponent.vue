@@ -23,6 +23,21 @@
               Cargar
               <v-icon right dark> mdi-cloud-upload </v-icon>
             </v-btn>
+            <v-tooltip top>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  class="ma-2"
+                  v-bind="attrs"
+                  v-on="on"
+                  href="template.csv"
+                  dark
+                  download
+                  >
+                  <v-icon dark> mdi-cloud-download </v-icon>
+                </v-btn>
+              </template>
+              <span>Descargar Plantilla</span>
+            </v-tooltip>
             <v-spacer></v-spacer>
             <v-text-field
               class="text-xs-center"
