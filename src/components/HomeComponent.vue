@@ -32,7 +32,7 @@
                   href="template.csv"
                   dark
                   download
-                  >
+                >
                   <v-icon dark> mdi-cloud-download </v-icon>
                 </v-btn>
               </template>
@@ -49,8 +49,8 @@
             ></v-text-field>
             <v-spacer></v-spacer>
             <v-btn
-              :loading="loadingSendBtn"
-              :disabled="disableSendBtn"
+              :loading="loadingSendSingleBtn"
+              :disabled="disableSendSingleBtn"
               color="orange"
               class="ma-2 white--text"
               @click="showMessageModal"
@@ -58,16 +58,23 @@
               Mensaje Prueba
               <v-icon right dark>mdi-test-tube</v-icon>
             </v-btn>
-            <v-btn
-              :loading="loadingSendBtn"
-              :disabled="disableSendBtn"
-              color="green"
-              class="ma-2 white--text"
-              @click="sendWSMassiveMessage"
-            >
-              Enviar Mensaje
-              <v-icon right dark>mdi-send</v-icon>
-            </v-btn>
+            <v-tooltip top>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  v-bind="attrs"
+                  v-on="on"
+                  :loading="loadingSendBtn"
+                  :disabled="disableSendBtn"
+                  color="green"
+                  class="ma-2 white--text"
+                  @click="sendWSMassiveMessage"
+                >
+                  Enviar Masivo
+                  <v-icon right dark>mdi-send</v-icon>
+                </v-btn>
+              </template>
+              <span>{{toolTipMassive}}</span>
+            </v-tooltip>
           </v-toolbar>
         </template>
       </v-data-table>
@@ -165,6 +172,8 @@ export default {
     disableUploadBtn: false,
     loadingSendBtn: false,
     disableSendBtn: false,
+    loadingSendSingleBtn: false,
+    disableSendSingleBtn: false,
     fileProcessed: null,
     file: null,
     uploadModal: false,
@@ -173,11 +182,15 @@ export default {
       required: (value) => !!value || "Requerido.",
     },
     url: null,
+    toolTipMassive: 'Debe subir una plantilla'
   }),
   watch: {
     messageModal(val) {
       val || this.closeMessageModal();
       if (this.$refs.form != undefined) this.$refs.form.resetValidation();
+    },
+    items(val) {
+      this.toolTipMassive = "Enviar mensaje masivo a clientes."
     },
   },
   mounted() {},
@@ -199,7 +212,6 @@ export default {
 
     UploadClientsTemplate() {
       if (this.file == null) {
-        //alert("El archivo es de un formato incorrecto o no se ha cargado.");
         this.displayNotification(
           "error",
           "El archivo es de un formato incorrecto o no se ha cargado."
@@ -232,9 +244,6 @@ export default {
           );
 
           if (customersList.length == 0) {
-            // alert(
-            //   "No se pudo procesar el archivo, revise el formato o los datos."
-            // );
             me.displayNotification(
               "error",
               "No se pudo procesar el archivo, revise el formato."
@@ -242,8 +251,8 @@ export default {
             return;
           }
 
+          me.file = null;
           me.uploadModal = false;
-          //alert(".Se cargaron los registros correctamente");
           me.displayNotification(
             "success",
             "Se cargaron los registros correctamente."
@@ -268,8 +277,6 @@ export default {
       this.disableSendBtn = true;
       let me = this;
 
-      console.log(this.messageModel);
-      console.log(me.url);
       axios
         .post(me.url + "/send-message", {
           number: "1" + me.messageModel.phone,
