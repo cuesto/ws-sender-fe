@@ -75,6 +75,15 @@
               </template>
               <span>{{ toolTipMassive }}</span>
             </v-tooltip>
+            <v-btn
+              
+              color="orange"
+              class="ma-2 white--text"
+              @click="sendMedia"
+            >
+              Mensaje Media
+              <v-icon right dark>mdi-test-tube</v-icon>
+            </v-btn>
           </v-toolbar>
         </template>
         <template v-slot:item.options="{ item }">
@@ -103,6 +112,8 @@
           <template>
             <v-file-input
               v-model="file"
+              show-size
+              small-chips
               accept="file/*.csv"
               label="Cargar Plantilla"
             ></v-file-input>
@@ -201,7 +212,7 @@ export default {
     rules: {
       required: (value) => !!value || "Requerido.",
     },
-    url: null,
+    url: "http://localhost:8000",
     toolTipMassive: "Debe subir una plantilla",
     showPhoneOnModal: true,
     headerModalMessage: "",
@@ -219,9 +230,9 @@ export default {
   },
   mounted() {},
   created() {
-    if (this.$store.state.userProfile) {
-      this.url = this.$store.state.userProfile.server;
-    }
+    // if (this.$store.state.userProfile) {
+    //   this.url = this.$store.state.userProfile.server;
+    // }
   },
   methods: {
     displayNotification(type, message) {
@@ -363,6 +374,28 @@ export default {
         });
       this.disableSendSingleBtn = false;
       this.loadingSendSingleBtn = false;
+    },
+
+    async sendMedia() {
+      
+      let me = this;
+
+      await axios
+        .post(me.url + "/send-media", {
+          number: "18096019002",
+          caption: "Hola que tal",
+          file: me.file
+        })
+        .then(function (response) {
+          me.displayNotification("success", "Se envió el mensaje.");
+        })
+        .catch(function (error) {
+          me.displayNotification(
+            "error",
+            "Verifique la configuración del servidor o el número de telefono."
+          );
+        });
+      
     },
 
     sendWSMassiveMessage() {
