@@ -169,6 +169,7 @@ import Papa from "papaparse";
 import MessageModel from "../models/MessageModel";
 import axios from "axios";
 import { mask } from "vue-the-mask";
+import * as fb from "../firebase";
 
 export default {
   components: {},
@@ -342,6 +343,7 @@ export default {
       this.disableSendSingleBtn = true;
       this.loadingSendSingleBtn = true;
       let me = this;
+      let phone = this.messageModel.phone;
 
       await axios
         .post(me.url + "/send-message", {
@@ -350,8 +352,24 @@ export default {
         })
         .then(function (response) {
           me.displayNotification("success", "Se envió el mensaje.");
+          me.saveSuccessfulRequest(
+            response,
+            me.$store.state.userProfile.name +
+              "-" +
+              phone +
+              "-" +
+              new Date().toString()
+          );
         })
         .catch(function (error) {
+          me.saveErrorLog(
+            error,
+            me.$store.state.userProfile.name +
+              "-" +
+              phone +
+              "-" +
+              new Date().toString()
+          );
           me.displayNotification(
             "error",
             "Verifique la configuración del servidor o el número de telefono."
@@ -376,10 +394,26 @@ export default {
           })
           .then(function (response) {
             a.isSent = true;
+            me.saveSuccessfulRequest(
+              response,
+              me.$store.state.userProfile.name +
+                "-" +
+                a.phone +
+                "-" +
+                new Date().toString()
+            );
           })
           .catch(function (error) {
             a.hasError = true;
             console.log(error);
+            me.saveErrorLog(
+              error,
+              me.$store.state.userProfile.name +
+                "-" +
+                a.phone +
+                "-" +
+                new Date().toString()
+            );
           });
       });
 
@@ -390,7 +424,6 @@ export default {
     prepareSendWSMessage(name) {
       let message = this.messageModel.message;
       let newMessage = message.replace("{nombre}", name);
-      console.log(newMessage);
       return newMessage;
     },
 
@@ -404,6 +437,22 @@ export default {
       setTimeout(() => {
         this.messageModel = Object.assign({}, this.defaultItem);
       }, 300);
+    },
+
+    async saveSuccessfulRequest(response,title) {
+      await fb.requestCollection
+        .doc(title)
+        .set({
+          data: JSON.stringify(response),
+        });
+    },
+
+    async saveErrorLog(error, title) {
+      await fb.logsCollection.doc(title).set({
+        name: error.name,
+        message: error.message,
+        data: JSON.stringify(error),
+      });
     },
   },
 };
