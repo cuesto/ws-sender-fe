@@ -55,7 +55,7 @@
               class="ma-2 white--text"
               @click="showMessageSingleModal"
             >
-              Mensaje Prueba
+              Mensaje Único
               <v-icon right dark>mdi-test-tube</v-icon>
             </v-btn>
             <v-tooltip top>
@@ -69,7 +69,7 @@
                   class="ma-2 white--text"
                   @click="showMessageModal"
                 >
-                  Enviar Masivo
+                  Mensaje Masivo
                   <v-icon right dark>mdi-send</v-icon>
                 </v-btn>
               </template>
@@ -178,7 +178,6 @@ export default {
   data: () => ({
     mask: "##########",
     headers: [
-      { text: "Codigo", sortable: true, value: "code" },
       { text: "Nombre", sortable: true, value: "name" },
       { text: "Celular", sortable: true, value: "phone" },
       { text: "Estatus", sortable: true, value: "options" },
@@ -251,16 +250,13 @@ export default {
           me.fileProcessed = results.data;
           var customersList = results.data.map((a) => {
             return {
-              code: a.Codigo,
-              name: a.Nombres,
-              phone: a.TelCelular,
+              name: a.Nombre,
+              phone: a.Celular,
             };
           });
 
           customersList = customersList.filter(
             (x) =>
-              x.code != undefined &&
-              x.code != "" &&
               x.name != undefined &&
               x.name != "" &&
               x.phone != undefined &&
@@ -283,7 +279,7 @@ export default {
           );
 
           customersList.forEach((a) => {
-            me.items.push({ code: a.code, name: a.name, phone: a.phone });
+            me.items.push({ name: a.name, phone: a.phone });
           });
         },
       });
@@ -314,7 +310,7 @@ export default {
       this.showPhoneOnModal = false;
       this.messageModal = true;
       this.messageModel.message =
-        "¡Hola {nombre} 👋🏻!, Te escribimos de *Domex Herrera*📦 para informarte que tu(s) paquete(s) está(n) disponible(s)🎉.\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio 🚚 *GRATIS* o puede pasarlo a retirar por la sucursal 🙌🏻.";
+        "¡Hola {nombre}! 👋🏻, Te escribimos de *Domex Herrera*📦 para informarte que tu(s) paquete(s) está(n) disponible(s)🎉.\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio 🚚 *GRATIS* o puede pasarlo a retirar por la sucursal 🙌🏻.";
     },
 
     sendMessage() {
