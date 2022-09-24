@@ -249,7 +249,7 @@ export default {
         header: true,
         complete: function (results) {
           me.fileProcessed = results.data;
-          var customersList = results.data.map((a) => {
+          let customersList = results.data.map((a) => {
             return {
               name: a.Nombre,
               phone: a.Celular,
@@ -328,7 +328,7 @@ export default {
           })
           .then((result) => {
             if (result.value) {
-              if (this.showPhoneOnModal == true) {
+              if (this.showPhoneOnModal) {
                 this.sendWSSingleMessage();
               } else {
                 this.sendWSMassiveMessage();
@@ -385,7 +385,7 @@ export default {
       let me = this;
 
       this.items.forEach((a) => {
-        var message = me.prepareSendWSMessage(a.name);
+        let message = me.prepareSendWSMessage(a.name);
 
         axios
           .post(me.url + "/send-message", {

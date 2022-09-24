@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import * as fb from '../firebase'
 import { firebaseApp } from '../firebase';
-import { getFirestore,doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { getFirestore,doc, getDoc } from "firebase/firestore";
 
 import router from '../router/index'
 

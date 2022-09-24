@@ -21,19 +21,8 @@ const firebaseApp = firebase.initializeApp(firebaseConfig);
 const db = firebaseApp.firestore;
 const auth = firebaseApp.auth();
 
-// // collection references
-// const usersCollection = db.collection('users')
-// const requestCollection = db.collection('request')
-// const logsCollection = db.collection('logs')
-
-// export utils/refs
-export { auth };
-export default db; 
-export {firebaseApp};
-// export {
-//   db,
-//   auth
-//   // usersCollection,
-//   // requestCollection,
-//   // logsCollection
-// }
+export {
+  db,
+  auth,
+  firebaseApp
+}
