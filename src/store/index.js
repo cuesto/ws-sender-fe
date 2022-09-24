@@ -1,7 +1,12 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import * as fb from '../firebase'
+import { firebaseApp } from '../firebase';
+import { getFirestore,doc, getDoc } from "firebase/firestore";
+
 import router from '../router/index'
+
+const db = getFirestore(firebaseApp);
 
 Vue.use(Vuex)
 
@@ -38,11 +43,10 @@ export default new Vuex.Store({
 
     async fetchUserProfile({ commit }, user) {
       // fetch user profile
-      const userProfile = await fb.usersCollection.doc(user.uid).get()
-
+      const docRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(docRef);
       // set user profile in state
-      commit('setUserProfile', userProfile.data())
-
+      commit('setUserProfile', docSnap.data())
       // change route to dashboard
       router.push('/')
     },

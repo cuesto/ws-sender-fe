@@ -55,7 +55,7 @@
               class="ma-2 white--text"
               @click="showMessageSingleModal"
             >
-              Mensaje Prueba
+              Mensaje Único
               <v-icon right dark>mdi-test-tube</v-icon>
             </v-btn>
             <v-tooltip top>
@@ -69,7 +69,7 @@
                   class="ma-2 white--text"
                   @click="showMessageModal"
                 >
-                  Enviar Masivo
+                  Mensaje Masivo
                   <v-icon right dark>mdi-send</v-icon>
                 </v-btn>
               </template>
@@ -180,6 +180,7 @@ import Papa from "papaparse";
 import MessageModel from "../models/MessageModel";
 import axios from "axios";
 import { mask } from "vue-the-mask";
+import * as fb from "../firebase";
 
 export default {
   components: {},
@@ -189,7 +190,6 @@ export default {
   data: () => ({
     mask: "##########",
     headers: [
-      { text: "Codigo", sortable: true, value: "code" },
       { text: "Nombre", sortable: true, value: "name" },
       { text: "Celular", sortable: true, value: "phone" },
       { text: "Estatus", sortable: true, value: "options" },
@@ -260,18 +260,15 @@ export default {
         header: true,
         complete: function (results) {
           me.fileProcessed = results.data;
-          var customersList = results.data.map((a) => {
+          let customersList = results.data.map((a) => {
             return {
-              code: a.Codigo,
-              name: a.Nombres,
-              phone: a.TelCelular,
+              name: a.Nombre,
+              phone: a.Celular,
             };
           });
 
           customersList = customersList.filter(
             (x) =>
-              x.code != undefined &&
-              x.code != "" &&
               x.name != undefined &&
               x.name != "" &&
               x.phone != undefined &&
@@ -294,7 +291,7 @@ export default {
           );
 
           customersList.forEach((a) => {
-            me.items.push({ code: a.code, name: a.name, phone: a.phone });
+            me.items.push({ name: a.name, phone: a.phone });
           });
         },
       });
@@ -325,7 +322,7 @@ export default {
       this.showPhoneOnModal = false;
       this.messageModal = true;
       this.messageModel.message =
-        "¡Hola {nombre} 👋🏻!, Te escribimos de *Domex Herrera*📦 para informarte que tu(s) paquete(s) está(n) disponible(s)🎉.\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio 🚚 *GRATIS* o puede pasarlo a retirar por la sucursal 🙌🏻.";
+        "¡Hola {nombre}! 👋🏻, Te escribimos de *Domex Herrera*📦 para informarte que tu(s) paquete(s) está(n) disponible(s)🎉.\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio 🚚 *GRATIS* o puede pasarlo a retirar por la sucursal 🙌🏻.";
     },
 
     sendMessage() {
@@ -342,7 +339,7 @@ export default {
           })
           .then((result) => {
             if (result.value) {
-              if (this.showPhoneOnModal == true) {
+              if (this.showPhoneOnModal) {
                 this.sendWSSingleMessage();
               } else {
                 this.sendWSMassiveMessage();
@@ -357,6 +354,7 @@ export default {
       this.disableSendSingleBtn = true;
       this.loadingSendSingleBtn = true;
       let me = this;
+      let phone = this.messageModel.phone;
 
       await axios
         .post(me.url + "/send-message", {
@@ -365,8 +363,24 @@ export default {
         })
         .then(function (response) {
           me.displayNotification("success", "Se envió el mensaje.");
+          me.saveSuccessfulRequest(
+            response,
+            me.$store.state.userProfile.name +
+              "-" +
+              phone +
+              "-" +
+              new Date().toString()
+          );
         })
         .catch(function (error) {
+          me.saveErrorLog(
+            error,
+            me.$store.state.userProfile.name +
+              "-" +
+              phone +
+              "-" +
+              new Date().toString()
+          );
           me.displayNotification(
             "error",
             "Verifique la configuración del servidor o el número de telefono."
@@ -404,7 +418,7 @@ export default {
       let me = this;
 
       this.items.forEach((a) => {
-        var message = me.prepareSendWSMessage(a.name);
+        let message = me.prepareSendWSMessage(a.name);
 
         axios
           .post(me.url + "/send-message", {
@@ -413,10 +427,26 @@ export default {
           })
           .then(function (response) {
             a.isSent = true;
+            me.saveSuccessfulRequest(
+              response,
+              me.$store.state.userProfile.name +
+                "-" +
+                a.phone +
+                "-" +
+                new Date().toString()
+            );
           })
           .catch(function (error) {
             a.hasError = true;
             console.log(error);
+            me.saveErrorLog(
+              error,
+              me.$store.state.userProfile.name +
+                "-" +
+                a.phone +
+                "-" +
+                new Date().toString()
+            );
           });
       });
 
@@ -427,7 +457,6 @@ export default {
     prepareSendWSMessage(name) {
       let message = this.messageModel.message;
       let newMessage = message.replace("{nombre}", name);
-      console.log(newMessage);
       return newMessage;
     },
 
@@ -441,6 +470,22 @@ export default {
       setTimeout(() => {
         this.messageModel = Object.assign({}, this.defaultItem);
       }, 300);
+    },
+
+    async saveSuccessfulRequest(response,title) {
+      await fb.requestCollection
+        .doc(title)
+        .set({
+          data: JSON.stringify(response),
+        });
+    },
+
+    async saveErrorLog(error, title) {
+      await fb.logsCollection.doc(title).set({
+        name: error.name,
+        message: error.message,
+        data: JSON.stringify(error),
+      });
     },
   },
 };
