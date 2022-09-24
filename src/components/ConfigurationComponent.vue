@@ -1,7 +1,7 @@
 <template>
   <v-layout>
     <!-- HERE -->
-    <iframe id="ifrm" :src="url" width="1500" height="auto"></iframe>
+    <iframe title="wswebserver" id="ifrm" :src="url" width="1500" height="auto"></iframe>
   </v-layout>
 </template>
 <script>
