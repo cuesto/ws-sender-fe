@@ -53,7 +53,8 @@
 </template>
 
 <script>
-import firebase from "firebase";
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 import router from "./router/index";
 
 export default {
@@ -65,7 +66,7 @@ export default {
     },
   },
   methods: {
-    async logout() {
+     async logout() {
       firebase
         .auth()
         .signOut()
