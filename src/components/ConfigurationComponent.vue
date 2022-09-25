@@ -1,10 +1,22 @@
 <template>
   <v-layout>
     <!-- HERE -->
-    <iframe title="wswebserver" id="ifrm" :src="url" width="1500" height="auto"></iframe>
+    <iframe
+      title="wswebserver"
+      id="ifrm"
+      :src="url"
+      width="1500"
+      height="auto"
+    ></iframe>
   </v-layout>
 </template>
 <script>
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { firebaseApp } from "../firebase";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+
+const db = getFirestore(firebaseApp);
+
 export default {
   components: {},
   data: () => ({
@@ -13,10 +25,24 @@ export default {
   watch: {},
   mounted() {},
   created() {
-    if (this.$store.state.userProfile) {
-      this.url = this.$store.state.userProfile.server;
-    }
+    const auth = getAuth();
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        this.getUserData(user.uid);
+      }
+    });
   },
-  methods: {},
+  methods: {
+    async getUserData(uid) {
+      const userRef = doc(db, "profiles", uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        this.url = userSnap.data().server;
+      } else {
+        // doc.data() will be undefined in this case
+        console.log("No such document!");
+      }
+    },
+  },
 };
 </script>

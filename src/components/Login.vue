@@ -181,7 +181,7 @@ export default {
             name: this.signupForm.name,
             email: this.signupForm.email,
             username: this.signupForm.username,
-            uid: registeredUser.uid,
+            server: this.signupForm.server
           })
             .then(() => {
               console.log("se creo el profile");
