@@ -126,7 +126,7 @@ export default {
     rules: {
       required: (value) => !!value || "Requerido.",
       email: (value) => {
-        const pattern = /\S+@\S+\.\S+/;
+        const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return pattern.test(value) || "Correo Inválido.";
       },
     },
