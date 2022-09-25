@@ -154,6 +154,7 @@ export default {
           const user = userCredential.user;
           console.log("Logueado:");
           console.log(user);
+          this.$router.go( {path: this.$router.path} );
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -188,7 +189,7 @@ export default {
                 displayName: this.signupForm.username,
               })
                 .then(() => {
-                  //this.$router.go({ path: this.$router.path });
+                  this.$router.go({ path: this.$router.path });
                   console.log("se actualizó:");
                   console.log(registeredUser);
                 })
