@@ -1,10 +1,10 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import router from '../router/index'
 import * as fb from '../firebase'
 import { firebaseApp } from '../firebase';
 import { getFirestore,doc, getDoc } from "firebase/firestore";
 
-import router from '../router/index'
 
 const db = getFirestore(firebaseApp);
 
