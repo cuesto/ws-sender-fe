@@ -108,7 +108,6 @@ import { firebaseApp } from "../firebase";
 import { getFirestore, doc, setDoc, collection } from "firebase/firestore";
 
 const db = getFirestore(firebaseApp);
-const profilesRef = collection(db, "profiles");
 
 export default {
   data: () => ({
@@ -166,6 +165,7 @@ export default {
 
     async signup() {
       const auth = getAuth();
+      const profilesRef = collection(db, "profiles");
       createUserWithEmailAndPassword(
         auth,
         this.signupForm.email,

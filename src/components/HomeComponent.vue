@@ -170,6 +170,18 @@ import MessageModel from "../models/MessageModel";
 import axios from "axios";
 import { mask } from "vue-the-mask";
 import * as fb from "../firebase";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { firebaseApp } from "../firebase";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+} from "firebase/firestore";
+
+const db = getFirestore(firebaseApp);
+const auth = getAuth();
 
 export default {
   components: {},
@@ -219,11 +231,24 @@ export default {
   },
   mounted() {},
   created() {
-    if (this.$store.state.userProfile) {
-      this.url = this.$store.state.userProfile.server;
-    }
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        this.getUserData(user.uid);
+      }
+    });
   },
   methods: {
+    async getUserData(uid) {
+      const userRef = doc(db, "profiles", uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        this.url = userSnap.data().server;
+      } else {
+        // doc.data() will be undefined in this case
+        console.log("No such document!");
+      }
+    },
+
     displayNotification(type, message) {
       this.$swal.fire({
         position: "top-end",
@@ -352,24 +377,10 @@ export default {
         })
         .then(function (response) {
           me.displayNotification("success", "Se envió el mensaje.");
-          me.saveSuccessfulRequest(
-            response,
-            me.$store.state.userProfile.name +
-              "-" +
-              phone +
-              "-" +
-              new Date().toString()
-          );
+          me.saveSuccessfulRequest(response);
         })
         .catch(function (error) {
-          me.saveErrorLog(
-            error,
-            me.$store.state.userProfile.name +
-              "-" +
-              phone +
-              "-" +
-              new Date().toString()
-          );
+          me.saveErrorLog(error);
           me.displayNotification(
             "error",
             "Verifique la configuración del servidor o el número de telefono."
@@ -394,26 +405,12 @@ export default {
           })
           .then(function (response) {
             a.isSent = true;
-            me.saveSuccessfulRequest(
-              response,
-              me.$store.state.userProfile.name +
-                "-" +
-                a.phone +
-                "-" +
-                new Date().toString()
-            );
+            me.saveSuccessfulRequest(response);
           })
           .catch(function (error) {
             a.hasError = true;
             console.log(error);
-            me.saveErrorLog(
-              error,
-              me.$store.state.userProfile.name +
-                "-" +
-                a.phone +
-                "-" +
-                new Date().toString()
-            );
+            me.saveErrorLog(error);
           });
       });
 
@@ -439,20 +436,28 @@ export default {
       }, 300);
     },
 
-    async saveSuccessfulRequest(response,title) {
-      await fb.requestCollection
-        .doc(title)
-        .set({
-          data: JSON.stringify(response),
-        });
+    async saveSuccessfulRequest(response) {
+      const requestsRef = collection(db, "requests");
+      setDoc(doc(requestsRef), {
+        uid: auth.currentUser.uid,
+        response: JSON.stringify(response),
+        date: new Date().toString(),
+      })
+        .then(() => {})
+        .catch(() => console.log);
     },
 
-    async saveErrorLog(error, title) {
-      await fb.logsCollection.doc(title).set({
+    async saveErrorLog(error) {
+      const logsRef = collection(db, "logs");
+      setDoc(doc(logsRef), {
         name: error.name,
         message: error.message,
+        uid: auth.currentUser.uid,
         data: JSON.stringify(error),
-      });
+        date: new Date().toString(),
+      })
+        .then(() => {})
+        .catch(() => console.log);
     },
   },
 };
