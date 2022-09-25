@@ -112,22 +112,21 @@ const db = getFirestore(firebaseApp);
 export default {
   data: () => ({
     loginForm: {
-      email: "jcuesto@domex.com.do",
-      password: "123456",
+      email: "", //"jcuesto@domex.com.do",
+      password: "", //"123456",
     },
     signupForm: {
-      name: "jhon",
-      username: "jhcuesto",
-      email: "jc@mail.com",
-      password: "123456",
-      server: "www.server.com",
+      name: "", //"jhon",
+      username: "", //"jhcuesto",
+      email: "", //"jc@mail.com",
+      password: "", //"123456",
+      server: "", //"www.server.com",
     },
     showLoginForm: true,
     rules: {
       required: (value) => !!value || "Requerido.",
       email: (value) => {
-        const pattern =
-          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        const pattern = /\S+@\S+\.\S+/;
         return pattern.test(value) || "Correo Inválido.";
       },
     },
@@ -153,7 +152,7 @@ export default {
           const user = userCredential.user;
           console.log("Logueado:");
           console.log(user);
-          this.$router.go( {path: this.$router.path} );
+          this.$router.go({ path: this.$router.path });
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -181,7 +180,7 @@ export default {
             name: this.signupForm.name,
             email: this.signupForm.email,
             username: this.signupForm.username,
-            server: this.signupForm.server
+            server: this.signupForm.server,
           })
             .then(() => {
               console.log("se creo el profile");

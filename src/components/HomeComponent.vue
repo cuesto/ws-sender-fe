@@ -169,7 +169,6 @@ import Papa from "papaparse";
 import MessageModel from "../models/MessageModel";
 import axios from "axios";
 import { mask } from "vue-the-mask";
-import * as fb from "../firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { firebaseApp } from "../firebase";
 import {
@@ -368,7 +367,6 @@ export default {
       this.disableSendSingleBtn = true;
       this.loadingSendSingleBtn = true;
       let me = this;
-      let phone = this.messageModel.phone;
 
       await axios
         .post(me.url + "/send-message", {
