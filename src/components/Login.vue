@@ -35,7 +35,7 @@
                   <div class="extras">
                     <v-spacer></v-spacer>
                     <!-- Activate if need to create new account -->
-                    <!-- <a @click="toggleForm()">Crear una cuenta</a> -->
+                    <a @click="toggleForm()">Crear una cuenta</a>
                   </div>
                 </form>
                 <form v-else @submit.prevent>
@@ -44,6 +44,14 @@
                     v-model.trim="signupForm.name"
                     label="Nombre"
                     name="name"
+                    prepend-icon="person"
+                    type="text"
+                    :rules="[rules.required]"
+                  ></v-text-field>
+                  <v-text-field
+                    v-model.trim="signupForm.username"
+                    label="Usuario"
+                    name="username"
                     prepend-icon="person"
                     type="text"
                     :rules="[rules.required]"
@@ -69,7 +77,7 @@
                     v-model.trim="signupForm.server"
                     label="Servidor"
                     name="server"
-                    prepend-icon="Storage"
+                    prepend-icon="storage"
                     type="text"
                     :rules="[rules.required]"
                   ></v-text-field>
@@ -90,49 +98,110 @@
 </template>
 
 <script>
-import axios from "axios";
+import {
+  getAuth,
+  updateProfile,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from "firebase/auth";
+import { firebaseApp } from "../firebase";
+import { getFirestore, doc, setDoc, collection } from "firebase/firestore";
+
+const db = getFirestore(firebaseApp);
+const profilesRef = collection(db, "profiles");
+
 export default {
   data: () => ({
     loginForm: {
-      email: "",//"jcuesto@domex.com.do",
-      password: ""//"123456",
+      email: "jcuesto@domex.com.do",
+      password: "123456",
     },
     signupForm: {
-      name: "",
-      email: "",
-      password: "",
-      server: ""
+      name: "jhon",
+      username: "jhcuesto",
+      email: "jc@mail.com",
+      password: "123456",
+      server: "www.server.com",
     },
     showLoginForm: true,
     rules: {
       required: (value) => !!value || "Requerido.",
       email: (value) => {
-        const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        const pattern =
+          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return pattern.test(value) || "Correo Inválido.";
       },
     },
     error: null,
   }),
+
   created() {},
+
   methods: {
-  toggleForm() {
-      this.showLoginForm = !this.showLoginForm
+    toggleForm() {
+      this.showLoginForm = !this.showLoginForm;
     },
+
     async login() {
-      this.$store.dispatch("login", {
-        email: this.loginForm.email,
-        password: this.loginForm.password,
-      });
-      this.$router.push({ name: "Home" });
+      const auth = getAuth();
+      signInWithEmailAndPassword(
+        auth,
+        this.loginForm.email,
+        this.loginForm.password
+      )
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+          console.log("Logueado:");
+          console.log(user);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log(errorCode + " - " + errorMessage);
+          this.error = errorMessage;
+        });
     },
-    signup() {
-      this.$store.dispatch("signup", {
-        email: this.signupForm.email,
-        password: this.signupForm.password,
-        name: this.signupForm.name,
-        server: this.signupForm.server
-      });
-      this.$router.push({ name: "login" });
+
+    async signup() {
+      const auth = getAuth();
+      createUserWithEmailAndPassword(
+        auth,
+        this.signupForm.email,
+        this.signupForm.password
+      )
+        .then((userCredential) => {
+          // Signed in
+          let registeredUser = userCredential.user;
+          console.log("registrado:");
+          console.log(registeredUser);
+          //Registra o perfil
+          setDoc(doc(profilesRef, registeredUser.uid), {
+            name: this.signupForm.name,
+            email: this.signupForm.email,
+            username: this.signupForm.username,
+            uid: registeredUser.uid,
+          })
+            .then(() => {
+              console.log("se creo el profile");
+              updateProfile(auth.currentUser, {
+                displayName: this.signupForm.username,
+              })
+                .then(() => {
+                  //this.$router.go({ path: this.$router.path });
+                  console.log("se actualizó:");
+                  console.log(registeredUser);
+                })
+                .catch(() => console.log);
+            })
+            .catch(() => console.log);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log(errorCode + " - " + errorMessage);
+          this.error = errorMessage;
+        });
     },
   },
 };
