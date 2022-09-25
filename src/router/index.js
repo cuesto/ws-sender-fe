@@ -1,16 +1,19 @@
 import Vue from 'vue'
-import VueRouter from 'vue-router'
+import Router from 'vue-router'
 import Home from '../views/Home.vue'
 import Configuration from '../views/Configuration.vue'
+import Login from '../views/Login.vue'
+import {
+  getAuth,
+  onAuthStateChanged,
+} from "firebase/auth";
 
-import { auth } from '../firebase'
+Vue.use(Router)
 
-Vue.use(VueRouter)
-
-  const routes = [
+const routes = [
   {
     path: '/',
-    name: 'Home',
+    name: 'home',
     component: Home,
     meta: {
       requiresAuth: true
@@ -18,15 +21,19 @@ Vue.use(VueRouter)
   },
   {
     path: '/login',
-    name: 'Login',
+    name: 'login',
+    component: Login,
+    meta: {
+      requiresGuest: true
+    }
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "login" */ '../views/Login.vue')
+    //component: () => import(/* webpackChunkName: "login" */ '../views/Login.vue')
   },
   {
     path: '/Configuration',
-    name: 'Configuration',
+    name: 'configuration',
     component: Configuration,
     meta: {
       requiresAuth: true
@@ -34,20 +41,51 @@ Vue.use(VueRouter)
   }
 ]
 
-const router = new VueRouter({
+const router = new Router({
   mode: 'history',
-  base: process.env.BASE_URL,
+  //base: process.env.BASE_URL,
   routes
 })
 
 router.beforeEach((to, from, next) => {
-  const requiresAuth = to.matched.some(x => x.meta.requiresAuth)
+  const auth = getAuth();
 
-  if (requiresAuth && !auth.currentUser) {
-    next('/login')
-  } else {
-    next()
+  // checks for requiredAuth
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    // check if not logged in
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // go to login page
+        next({
+          path: '/login',
+          query: {
+            redirect: to.fullPath
+          }
+        });
+      } else {
+        next();
+      }
+    });
+  } else if (to.matched.some(record => record.meta.requiresGuest)) {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // go to home page
+        next({
+          path: '/',
+          query: {
+            redirect: to.fullPath
+          }
+        });
+      } else {
+        next();
+      }
+    });
   }
-})
+  else {
+    next();
+  }
 
-export default router
+
+});
+
+export default router;

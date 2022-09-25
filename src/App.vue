@@ -1,16 +1,16 @@
 <template>
   <v-app id="inspire">
-    <v-navigation-drawer v-model="drawer" v-if="logged" app>
+    <v-navigation-drawer v-model="drawer" v-if="isLoggedIn" app>
       <template>
         <v-list dense>
           <template>
-            <v-list-item :to="{ name: 'Home' }">
+            <v-list-item :to="{ name: 'home' }">
               <v-list-item-action>
                 <v-icon>mdi-home</v-icon>
               </v-list-item-action>
               <v-list-item-title>Inicio</v-list-item-title>
             </v-list-item>
-            <v-list-item :to="{ name: 'Configuration' }">
+            <v-list-item :to="{ name: 'configuration' }">
               <v-list-item-action>
                 <v-icon>settings</v-icon>
               </v-list-item-action>
@@ -23,9 +23,14 @@
 
     <v-app-bar app>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-      <!-- <v-toolbar-title>Envío de Mensajes por WhatsApp</v-toolbar-title> -->
+
       <v-spacer></v-spacer>
-      <v-btn color="red" class="ma-2 white--text" @click="logout" v-if="logged">
+      <v-btn
+        color="red"
+        class="ma-2 white--text"
+        @click="logout"
+        v-if="isLoggedIn"
+      >
         LogOut
         <v-icon right dark>mdi-logout</v-icon>
       </v-btn>
@@ -53,29 +58,35 @@
 </template>
 
 <script>
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
+
 import router from "./router/index";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+
+const auth = getAuth();
 
 export default {
-  data: () => ({ drawer: null }),
-  computed: {
-    logged() {
-      if (this.$store.state.userProfile == null) this.logout();
-      return this.$store.state.userProfile;
-    },
+  data: () => ({
+    drawer: null,
+    isLoggedIn: false,
+  }),
+  created() {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        this.isLoggedIn = true;
+      } else {
+        this.isLoggedIn = false;
+      }
+    });
   },
   methods: {
-     async logout() {
-      firebase
-        .auth()
-        .signOut()
+    async logout() {
+      signOut(auth)
         .then(() => {
-          this.$store.state.userProfile = null;
-          router.push("/login");
+          // Sign-out successful.
+          console.log("se deslogueo");
         })
         .catch((error) => {
-          router.push("/login");
+          console.log(error);
         });
     },
   },
