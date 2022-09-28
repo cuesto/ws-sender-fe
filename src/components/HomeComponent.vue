@@ -6,8 +6,8 @@
         :search="search"
         :items="items"
         class="elevation-1"
-        :items-per-page="50"
-        :footer-props="{ 'items-per-page-options': [50, 100, 250, 500] }"
+        :items-per-page="10"
+        :footer-props="{ 'items-per-page-options': [10, 50, 100, 250, 500] }"
       >
         <template v-slot:top>
           <v-toolbar flat color="white">
