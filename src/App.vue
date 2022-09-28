@@ -1,48 +1,103 @@
 <template>
   <v-app id="inspire">
-    <v-navigation-drawer v-model="drawer" v-if="isLoggedIn" app>
-      <template>
-        <v-list dense>
-          <template>
+    <v-card class="overflow-hidden" height="100%">
+      <v-navigation-drawer v-model="drawer" v-if="isLoggedIn" app>
+        <v-list dense nav>
+          <v-list-item-group active-class="blue--text text--accent-3">
             <v-list-item :to="{ name: 'home' }">
-              <v-list-item-action>
+              <v-list-item-icon>
                 <v-icon>mdi-home</v-icon>
-              </v-list-item-action>
+              </v-list-item-icon>
               <v-list-item-title>Inicio</v-list-item-title>
             </v-list-item>
-            <v-list-item :to="{ name: 'configuration' }">
-              <v-list-item-action>
-                <v-icon>settings</v-icon>
-              </v-list-item-action>
-              <v-list-item-title>Configuración</v-list-item-title>
+            <v-list-item>
+              <v-list-item-icon>
+                <v-icon>mdi-view-dashboard</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title>Dashboard</v-list-item-title>
             </v-list-item>
-          </template>
+            <v-list-group :value="false" prepend-icon="mdi-contacts" no-action>
+              <template v-slot:activator>
+                <v-list-item-content>
+                  <v-list-item-title>Contact Center</v-list-item-title>
+                </v-list-item-content>
+              </template>
+              <v-list-item>
+                <v-list-item-icon>
+                  <v-icon>mdi-account-multiple</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Clientes</v-list-item-title>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-icon>
+                  <v-icon>mdi-account-group</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Grupos</v-list-item-title>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-icon>
+                  <v-icon>mdi-send</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Campañas</v-list-item-title>
+              </v-list-item>
+            </v-list-group>
+            <v-list-item>
+              <v-list-item-icon>
+                <v-icon>mdi-image-multiple</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title>Galería</v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-icon>
+                <v-icon>mdi-chart-bar</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title>Reportes</v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-icon>
+                <v-icon>mdi-history</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title>Historial</v-list-item-title>
+            </v-list-item>
+            <v-list-group :value="false" prepend-icon="settings" no-action>
+              <template v-slot:activator>
+                <v-list-item-content>
+                  <v-list-item-title>Configuración</v-list-item-title>
+                </v-list-item-content>
+              </template>
+              <v-list-item :to="{ name: 'configuration' }">
+                <v-list-item-icon>
+                  <v-icon>mdi-server</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Servidor WhatsApp</v-list-item-title>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-icon>
+                  <v-icon>mdi-account-multiple</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Usuarios</v-list-item-title>
+              </v-list-item>
+            </v-list-group>
+          </v-list-item-group>
         </v-list>
-      </template>
-    </v-navigation-drawer>
-
-    <v-app-bar app>
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-
-      <v-spacer></v-spacer>
-      <v-btn
-        color="red"
-        class="ma-2 white--text"
-        @click="logout"
-        v-if="isLoggedIn"
-      >
-        LogOut
-        <v-icon right dark>mdi-logout</v-icon>
-      </v-btn>
-    </v-app-bar>
-
-    <v-main>
-      <v-container fluid fill-height>
-        <v-slide-y-transition mode="out-in">
-          <router-view />
-        </v-slide-y-transition>
-      </v-container>
-    </v-main>
+        <template v-slot:append>
+          <div class="pa-2">
+            <v-btn color="secondary" @click="logout" block> Logout </v-btn>
+          </div>
+        </template>
+      </v-navigation-drawer>
+      <v-app-bar app>
+        <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+        <v-toolbar-title>WS Sender</v-toolbar-title>
+      </v-app-bar>
+      <v-main>
+        <v-container fluid fill-height >
+          <v-slide-y-transition mode="out-in">
+            <router-view />
+          </v-slide-y-transition>
+        </v-container>
+      </v-main>
+    </v-card>
     <v-footer blue height="auto">
       <v-layout justify-center>
         <v-flex text-md-right>
@@ -58,7 +113,6 @@
 </template>
 
 <script>
-
 import router from "./router/index";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 
@@ -66,8 +120,9 @@ const auth = getAuth();
 
 export default {
   data: () => ({
-    drawer: null,
+    drawer: true,
     isLoggedIn: false,
+    group: null,
   }),
   created() {
     onAuthStateChanged(auth, (user) => {
@@ -82,7 +137,6 @@ export default {
     async logout() {
       signOut(auth)
         .then(() => {
-          // Sign-out successful.
           console.log("se deslogueo");
         })
         .catch((error) => {
