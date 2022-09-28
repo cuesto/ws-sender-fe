@@ -112,8 +112,8 @@ const db = getFirestore(firebaseApp);
 export default {
   data: () => ({
     loginForm: {
-      email: "",//"jcuesto@domex.com.do",
-      password: ""//"123456",
+      email: "jcuesto@domex.com.do",
+      password: "123456",
     },
     signupForm: {
       name: "", //"jhon",
