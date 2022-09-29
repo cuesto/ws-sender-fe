@@ -5,8 +5,8 @@
       title="wswebserver"
       id="ifrm"
       :src="url"
-      width="1500"
-      height="auto"
+      width="100%"
+      height="400%"
     ></iframe>
   </v-layout>
 </template>
