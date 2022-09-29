@@ -76,7 +76,7 @@
             </v-dialog>
           </v-toolbar>
         </template>
-        <template v-slot:item.options="{ item }">
+        <template #[`item.actions`]="{ item }">
           <v-icon
             size="sm"
             variant="outline-info"
@@ -89,11 +89,11 @@
             >delete</v-icon
           >
         </template>
-        <!-- <template v-slot:no-data>
-          <v-btn color="primary" @click="getUsers">
+        <template v-slot:no-data>
+          <v-btn color="primary">
             <v-icon left dark>autorenew</v-icon>Refrescar
           </v-btn>
-        </template> -->
+        </template>
       </v-data-table>
     </v-flex>
   </v-layout>
@@ -101,25 +101,31 @@
 <script>
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { firebaseApp } from "../firebase";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc,setDoc, collection } from "firebase/firestore";
 import ClientModel from "../models/ClientModel";
 import { mask } from "vue-the-mask";
 
 const db = getFirestore(firebaseApp);
 
 export default {
-   directives: {
-    mask
+  directives: {
+    mask,
   },
   data: () => ({
-    clients: [],
+    clients: [
+      {
+        id: "D01-153335",
+        name: "Joik",
+        phone: "8095554444",
+      },
+    ],
     mask: "(###)-###-####",
     dialog: false,
     headers: [
       { text: "Id", sortable: true, value: "id" },
       { text: "Nombre", sortable: true, value: "name" },
       { text: "Celular", sortable: false, value: "phone" },
-      { text: "Opciones", value: "options", sortable: false },
+      { text: "Opciones", value: "actions", sortable: false },
     ],
     rules: {
       required: (value) => !!value || "Requerido.",
@@ -149,6 +155,7 @@ export default {
   mounted() {},
   created() {
     // const auth = getAuth();
+    // console.log(auth.currentUser);
     // onAuthStateChanged(auth, (user) => {
     //   if (user) {
     //     this.getUserData(user.uid);
@@ -167,15 +174,37 @@ export default {
     },
 
     editItem(item) {
-      this.editedIndex = this.users.indexOf(item);
+      this.editedIndex = this.clients.indexOf(item);
       this.clientModel = Object.assign({}, item);
-
       this.dialog = true;
     },
 
     deleteItem(item) {},
 
-    async save() {},
+    async save() {
+      if (this.$refs.form.validate()) {
+        const auth = getAuth();
+        console.log(this.clientModel)
+        const clientssRef = collection(db, "profiles");
+           //.doc(auth.currentUser.uid)
+           //.collection(db,"clients");
+
+        if (this.editedIndex > -1) {
+          console.log("editar");
+        } else {
+          console.log("guardar");
+          setDoc(doc(clientssRef, auth.currentUser.uid,"clients",this.clientModel.id), {
+            id: this.clientModel.id,
+            name: this.clientModel.name,
+            phone: this.clientModel.phone,
+          })
+            .then(() => {
+              console.log("se creo el registro");
+            })
+            .catch(() => console.log);
+        }
+      }
+    },
 
     close() {
       this.dialog = false;

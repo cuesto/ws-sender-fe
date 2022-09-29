@@ -77,7 +77,7 @@
             </v-tooltip>
           </v-toolbar>
         </template>
-        <template v-slot:item.options="{ item }">
+       <template #[`item.actions`]="{ item }">
           <v-icon
             size="sm"
             variant="outline-info"
@@ -192,7 +192,7 @@ export default {
     headers: [
       { text: "Nombre", sortable: true, value: "name" },
       { text: "Celular", sortable: true, value: "phone" },
-      { text: "Estatus", sortable: true, value: "options" },
+      { text: "Estatus", sortable: true, value: "actions" },
     ],
     items: [],
     code: "",
