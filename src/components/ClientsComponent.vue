@@ -99,12 +99,11 @@
   </v-layout>
 </template>
 <script>
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { firebaseApp } from "../firebase";
 import {
   getFirestore,
   doc,
-  getDoc,
   getDocs,
   setDoc,
   collection,
@@ -166,11 +165,11 @@ export default {
         type: type,
         title: message,
         showConfirmButton: false,
-        timer: 2500,
+        timer: 1500,
       });
     },
     async getClients() {
-      this.clients= [];
+      this.clients = [];
       const querySnapshot = await getDocs(
         collection(db, "profiles/" + auth.currentUser.uid + "/clients")
       );
@@ -197,10 +196,7 @@ export default {
       if (this.$refs.form.validate()) {
         const clientssRef = collection(db, "profiles");
 
-        if (this.editedIndex > -1) {
-          console.log("editar");
-        } else {
-          console.log("guardar");
+        
           setDoc(
             doc(
               clientssRef,
@@ -215,19 +211,18 @@ export default {
             }
           )
             .then(() => {
-              console.log("se creo el registro");
               this.close();
               this.getClients();
               this.clean();
               this.displayNotification(
                 "success",
-                "Se creó el registro correctamente."
+                "Se realizó la operación correctamente."
               );
             })
             .catch(function (error) {
               me.displayNotification("error", error.message);
             });
-        }
+        
       }
     },
 

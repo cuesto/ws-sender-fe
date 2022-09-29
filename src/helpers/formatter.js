@@ -7,11 +7,6 @@ const phoneNumberFormatter = function(number) {
     if (formatted.startsWith('1')) {
       formatted = formatted.substr(1);
     }
-  
-    // if (!formatted.endsWith('@c.us')) {
-    //   formatted += '@c.us';
-    // }
-  
     return formatted;
   }
   
