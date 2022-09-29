@@ -90,7 +90,7 @@
           >
         </template>
         <template v-slot:no-data>
-          <v-btn color="primary">
+          <v-btn color="primary" @click="getClients">
             <v-icon left dark>autorenew</v-icon>Refrescar
           </v-btn>
         </template>
@@ -101,10 +101,18 @@
 <script>
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { firebaseApp } from "../firebase";
-import { getFirestore, doc, getDoc,setDoc, collection } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  collection,
+} from "firebase/firestore";
 import ClientModel from "../models/ClientModel";
 import { mask } from "vue-the-mask";
 
+const auth = getAuth();
 const db = getFirestore(firebaseApp);
 
 export default {
@@ -113,11 +121,11 @@ export default {
   },
   data: () => ({
     clients: [
-      {
-        id: "D01-153335",
-        name: "Joik",
-        phone: "8095554444",
-      },
+      // {
+      //   id: "D01-153335",
+      //   name: "Joik",
+      //   phone: "8095554444",
+      // },
     ],
     mask: "(###)-###-####",
     dialog: false,
@@ -154,13 +162,7 @@ export default {
   },
   mounted() {},
   created() {
-    // const auth = getAuth();
-    // console.log(auth.currentUser);
-    // onAuthStateChanged(auth, (user) => {
-    //   if (user) {
-    //     this.getUserData(user.uid);
-    //   }
-    // });
+    this.getClients();
   },
   methods: {
     displayNotification(type, message) {
@@ -170,6 +172,20 @@ export default {
         title: message,
         showConfirmButton: false,
         timer: 2500,
+      });
+    },
+    async getClients() {
+      const querySnapshot = await getDocs(
+        collection(db, "profiles/" + auth.currentUser.uid + "/clients")
+      );
+      querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        console.log(doc.id, " => ", doc.data());
+        this.clients.push({
+          id: doc.data().id,
+          name: doc.data().name,
+          phone: doc.data().phone,
+        });
       });
     },
 
@@ -183,25 +199,38 @@ export default {
 
     async save() {
       if (this.$refs.form.validate()) {
-        const auth = getAuth();
-        console.log(this.clientModel)
         const clientssRef = collection(db, "profiles");
-           //.doc(auth.currentUser.uid)
-           //.collection(db,"clients");
 
         if (this.editedIndex > -1) {
           console.log("editar");
         } else {
           console.log("guardar");
-          setDoc(doc(clientssRef, auth.currentUser.uid,"clients",this.clientModel.id), {
-            id: this.clientModel.id,
-            name: this.clientModel.name,
-            phone: this.clientModel.phone,
-          })
+          setDoc(
+            doc(
+              clientssRef,
+              auth.currentUser.uid,
+              "clients",
+              this.clientModel.id
+            ),
+            {
+              id: this.clientModel.id,
+              name: this.clientModel.name,
+              phone: this.clientModel.phone,
+            }
+          )
             .then(() => {
               console.log("se creo el registro");
+              this.close();
+              this.getClients();
+              this.clean();
+              this.displayNotification(
+                "success",
+                "Se creó el registro correctamente."
+              );
             })
-            .catch(() => console.log);
+            .catch(function (error) {
+              me.displayNotification("error", error.message);
+            });
         }
       }
     },
@@ -216,16 +245,6 @@ export default {
     clean() {
       this.clientModel = new ClientModel();
     },
-
-    // async getUserData(uid) {
-    //   const userRef = doc(db, "profiles", uid);
-    //   const userSnap = await getDoc(userRef);
-    //   if (userSnap.exists()) {
-    //     //this.url = userSnap.data().server;
-    //   } else {
-    //     console.log("No such document!");
-    //   }
-    // },
   },
 };
 </script>
