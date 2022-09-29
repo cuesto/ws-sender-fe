@@ -5,6 +5,7 @@
         :headers="headers"
         :search="search"
         :items="clients"
+        :loading="loadingtable"
         sort-by="name"
         class="elevation-1"
       >
@@ -205,6 +206,7 @@ export default {
     uploadModal: false,
     loadingUploadBtn: false,
     disableUploadBtn: false,
+    loadingtable:false
   }),
   computed: {
     formTitle() {
@@ -303,6 +305,7 @@ export default {
     },
 
     async getClients() {
+      this.loadingtable = true;
       this.clients = [];
       const querySnapshot = await getDocs(
         collection(db, "profiles/" + auth.currentUser.uid + "/clients")
@@ -315,6 +318,7 @@ export default {
           phone: doc.data().phone,
         });
       });
+      this.loadingtable = false;
     },
 
     editItem(item) {
