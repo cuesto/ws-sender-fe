@@ -25,7 +25,7 @@
             <v-dialog v-model="dialog" persistent max-width="600px">
               <template v-slot:activator="{ on }">
                 <v-btn color="green" dark v-on="on">
-                  <v-icon left dark>person_add</v-icon>Nuevo Cliente
+                  <v-icon left dark>person_add</v-icon>Agregar
                 </v-btn>
               </template>
               <v-form ref="form">
@@ -67,12 +67,74 @@
                     <v-btn color="blue darken-1" text @click="dialog = false"
                       >Cerrar</v-btn
                     >
-                    <v-btn color="blue darken-1" text @click="save">
+                    <v-btn color="green" dark text @click="save">
                       <v-icon left>save</v-icon>Guardar
                     </v-btn>
                   </v-card-actions>
                 </v-card>
               </v-form>
+            </v-dialog>
+            <v-dialog v-model="uploadModal" max-width="500px">
+              <template v-slot:activator="{ on }">
+                <v-btn
+                  :loading="loadingUploadBtn"
+                  :disabled="disableUploadBtn"
+                  color="orange"
+                  dark
+                  v-on="on"
+                  class="mx-3"
+                >
+                  <v-icon left dark>mdi-cloud-upload</v-icon>Importar
+                </v-btn>
+              </template>
+              <v-card>
+                <v-card-title>
+                  <span class="headline">Importar Clientes</span>
+                </v-card-title>
+                <v-card-text>
+                  <v-container>
+                    <v-row>
+                      <v-file-input
+                        v-model="file"
+                        accept="file/*.csv"
+                        label="Cargar plantilla .csv"
+                      ></v-file-input>
+                      <v-tooltip top>
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-btn
+                            class="ma-2"
+                            v-bind="attrs"
+                            v-on="on"
+                            href="template.csv"
+                            dark
+                            download
+                          >
+                            <v-icon dark> mdi-cloud-download </v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Descargar Plantilla</span>
+                      </v-tooltip>
+                      <v-spacer></v-spacer>
+                    </v-row>
+                    <v-row>
+                      <v-btn
+                        @click="UploadClientsTemplate()"
+                        color="orange"
+                        dark
+                      >
+                        <v-icon left>mdi-cloud-upload</v-icon>Importar
+                      </v-btn>
+                      <v-btn
+                        class="mx-3"
+                        @click="hideUploadModal()"
+                        color="blue darken-1"
+                        text
+                        >Cancelar</v-btn
+                      >
+                    </v-row>
+                  </v-container>
+                </v-card-text>
+              </v-card>
             </v-dialog>
           </v-toolbar>
         </template>
@@ -111,10 +173,12 @@ import {
 } from "firebase/firestore";
 import ClientModel from "../models/ClientModel";
 import { mask } from "vue-the-mask";
+import Papa from "papaparse";
 const { phoneNumberFormatter } = require("../helpers/formatter");
 
 const auth = getAuth();
 const db = getFirestore(firebaseApp);
+const clientssRef = collection(db, "profiles");
 
 export default {
   directives: {
@@ -132,17 +196,15 @@ export default {
     ],
     rules: {
       required: (value) => !!value || "Requerido.",
-      email: (value) => {
-        const pattern =
-          /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-        return pattern.test(value) || "Correo Inválido.";
-      },
     },
-    error: null,
     search: "",
     editedIndex: -1,
     clientModel: new ClientModel(),
-    passwordAnt: "",
+    fileProcessed: null,
+    file: null,
+    uploadModal: false,
+    loadingUploadBtn: false,
+    disableUploadBtn: false,
   }),
   computed: {
     formTitle() {
@@ -169,6 +231,77 @@ export default {
         timer: 1500,
       });
     },
+
+    UploadClientsTemplate() {
+      if (this.file == null) {
+        this.displayNotification(
+          "error",
+          "El archivo es de un formato incorrecto o no se ha cargado."
+        );
+        return;
+      }
+
+      this.loadingUploadBtn = true;
+      this.uploadModal = false;
+
+      let me = this;
+      let customersList = [];
+
+      Papa.parse(this.file, {
+        header: true,
+        complete: function (results) {
+          me.fileProcessed = results.data;
+          customersList = results.data.map((a) => {
+            return {
+              id: a.Id,
+              name: a.Nombre,
+              phone: a.Celular,
+            };
+          });
+
+          customersList = customersList.filter(
+            (x) =>
+              x.id != undefined &&
+              x.id != "" &&
+              x.name != undefined &&
+              x.name != "" &&
+              x.phone != undefined &&
+              x.phone != ""
+          );
+
+          if (customersList.length == 0) {
+            me.displayNotification(
+              "error",
+              "No se pudo procesar el archivo, revise el formato."
+            );
+            return;
+          }
+          console.log(customersList);
+          customersList.forEach((a) => {
+            setDoc(doc(clientssRef, auth.currentUser.uid, "clients", a.id), {
+              id: a.id,
+              name: a.name,
+              phone: phoneNumberFormatter(a.phone),
+            })
+              .then(() => {})
+              .catch((error) => {
+                console.log(error.message);
+                me.loadingUploadBtn = false;
+              });
+          });
+        },
+      });
+
+      me.loadingUploadBtn = false;
+      me.file = null;
+
+      me.displayNotification(
+        "success",
+        "Se cargaron los registros correctamente."
+      );
+      me.getClients();
+    },
+
     async getClients() {
       this.clients = [];
       const querySnapshot = await getDocs(
@@ -176,7 +309,6 @@ export default {
       );
       querySnapshot.forEach((doc) => {
         // doc.data() is never undefined for query doc snapshots
-        console.log(doc.id, " => ", doc.data());
         this.clients.push({
           id: doc.data().id,
           name: doc.data().name,
@@ -204,8 +336,6 @@ export default {
         })
         .then((result) => {
           if (result.value) {
-            const clientssRef = collection(db, "profiles");
-
             deleteDoc(
               doc(clientssRef, auth.currentUser.uid, "clients", item.id)
             )
@@ -227,8 +357,6 @@ export default {
 
     async save() {
       if (this.$refs.form.validate()) {
-        const clientssRef = collection(db, "profiles");
-
         setDoc(
           doc(
             clientssRef,
@@ -262,6 +390,11 @@ export default {
     },
     clean() {
       this.clientModel = new ClientModel();
+    },
+
+    hideUploadModal() {
+      this.uploadModal = false;
+      this.file = null;
     },
   },
 };
