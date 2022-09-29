@@ -10,7 +10,7 @@
               </v-list-item-icon>
               <v-list-item-title>Inicio</v-list-item-title>
             </v-list-item>
-            <v-list-item>
+            <v-list-item :to="{ name: 'about' }">
               <v-list-item-icon>
                 <v-icon>mdi-view-dashboard</v-icon>
               </v-list-item-icon>
@@ -22,13 +22,13 @@
                   <v-list-item-title>Contact Center</v-list-item-title>
                 </v-list-item-content>
               </template>
-              <v-list-item>
+              <v-list-item :to="{ name: 'clients' }">
                 <v-list-item-icon>
                   <v-icon>mdi-account-multiple</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Clientes</v-list-item-title>
               </v-list-item>
-              <v-list-item>
+              <v-list-item :to="{ name: 'about' }">
                 <v-list-item-icon>
                   <v-icon>mdi-account-group</v-icon>
                 </v-list-item-icon>
@@ -65,7 +65,7 @@
                   <v-list-item-title>Configuración</v-list-item-title>
                 </v-list-item-content>
               </template>
-              <v-list-item :to="{ name: 'configuration' }">
+              <v-list-item :to="{ name: 'wsserver' }">
                 <v-list-item-icon>
                   <v-icon>mdi-server</v-icon>
                 </v-list-item-icon>
@@ -91,7 +91,7 @@
         <v-toolbar-title>WS Sender</v-toolbar-title>
       </v-app-bar>
       <v-main>
-        <v-container fluid fill-height >
+        <v-container fluid fill-height>
           <v-slide-y-transition mode="out-in">
             <router-view />
           </v-slide-y-transition>
