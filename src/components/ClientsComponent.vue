@@ -106,6 +106,7 @@ import {
   doc,
   getDocs,
   setDoc,
+  deleteDoc,
   collection,
 } from "firebase/firestore";
 import ClientModel from "../models/ClientModel";
@@ -190,39 +191,69 @@ export default {
       this.dialog = true;
     },
 
-    deleteItem(item) {},
+    deleteItem(item) {
+      this.$swal
+        .fire({
+          title: "¿Está Seguro de Eliminar este registro?",
+          text: "¡No será posible revertir el cambio!",
+          type: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          confirmButtonText: "¡Borrar!",
+          cancelButtonText: "Cancelar",
+        })
+        .then((result) => {
+          if (result.value) {
+            const clientssRef = collection(db, "profiles");
+
+            deleteDoc(
+              doc(clientssRef, auth.currentUser.uid, "clients", item.id)
+            )
+              .then(() => {
+                this.close();
+                this.getClients();
+                this.clean();
+                this.displayNotification(
+                  "success",
+                  "Se eliminó el registro correctamente."
+                );
+              })
+              .catch(function (error) {
+                this.displayNotification("error", error.message);
+              });
+          }
+        });
+    },
 
     async save() {
       if (this.$refs.form.validate()) {
         const clientssRef = collection(db, "profiles");
 
-        
-          setDoc(
-            doc(
-              clientssRef,
-              auth.currentUser.uid,
-              "clients",
-              this.clientModel.id
-            ),
-            {
-              id: this.clientModel.id,
-              name: this.clientModel.name,
-              phone: phoneNumberFormatter(this.clientModel.phone),
-            }
-          )
-            .then(() => {
-              this.close();
-              this.getClients();
-              this.clean();
-              this.displayNotification(
-                "success",
-                "Se realizó la operación correctamente."
-              );
-            })
-            .catch(function (error) {
-              me.displayNotification("error", error.message);
-            });
-        
+        setDoc(
+          doc(
+            clientssRef,
+            auth.currentUser.uid,
+            "clients",
+            this.clientModel.id
+          ),
+          {
+            id: this.clientModel.id,
+            name: this.clientModel.name,
+            phone: phoneNumberFormatter(this.clientModel.phone),
+          }
+        )
+          .then(() => {
+            this.close();
+            this.getClients();
+            this.clean();
+            this.displayNotification(
+              "success",
+              "Se realizó la operación correctamente."
+            );
+          })
+          .catch(function (error) {
+            this.displayNotification("error", error.message);
+          });
       }
     },
 
