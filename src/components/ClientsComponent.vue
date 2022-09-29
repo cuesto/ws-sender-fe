@@ -236,11 +236,7 @@ export default {
             "clients",
             this.clientModel.id
           ),
-          {
-            id: this.clientModel.id,
-            name: this.clientModel.name,
-            phone: phoneNumberFormatter(this.clientModel.phone),
-          }
+          this.clientModel
         )
           .then(() => {
             this.close();
