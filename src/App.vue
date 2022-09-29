@@ -65,7 +65,7 @@
                   <v-list-item-title>Configuración</v-list-item-title>
                 </v-list-item-content>
               </template>
-              <v-list-item :to="{ name: 'configuration' }">
+              <v-list-item :to="{ name: 'wsserver' }">
                 <v-list-item-icon>
                   <v-icon>mdi-server</v-icon>
                 </v-list-item-icon>

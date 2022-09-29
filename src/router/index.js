@@ -3,7 +3,7 @@ import Router from 'vue-router'
 import Login from '../views/Login.vue'
 import Home from '../views/Home.vue'
 import Clients from '../views/Clients.vue'
-import Configuration from '../views/Configuration.vue'
+import WSServer from '../views/WSServer.vue'
 import About from '../views/About.vue'
 import {
   getAuth,
@@ -38,10 +38,9 @@ const routes = [
     }
   },
   {
-    //TODO: change name to wsserver
-    path: '/Configuration',
-    name: 'configuration',
-    component: Configuration,
+    path: '/WSServer',
+    name: 'wsserver',
+    component: WSServer,
     meta: {
       requiresAuth: true
     },
