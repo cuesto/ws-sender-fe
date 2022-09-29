@@ -111,6 +111,7 @@ import {
 } from "firebase/firestore";
 import ClientModel from "../models/ClientModel";
 import { mask } from "vue-the-mask";
+const { phoneNumberFormatter } = require("../helpers/formatter");
 
 const auth = getAuth();
 const db = getFirestore(firebaseApp);
@@ -120,14 +121,8 @@ export default {
     mask,
   },
   data: () => ({
-    clients: [
-      // {
-      //   id: "D01-153335",
-      //   name: "Joik",
-      //   phone: "8095554444",
-      // },
-    ],
-    mask: "(###)-###-####",
+    clients: [],
+    mask: "##########",
     dialog: false,
     headers: [
       { text: "Id", sortable: true, value: "id" },
@@ -175,6 +170,7 @@ export default {
       });
     },
     async getClients() {
+      this.clients= [];
       const querySnapshot = await getDocs(
         collection(db, "profiles/" + auth.currentUser.uid + "/clients")
       );
@@ -215,7 +211,7 @@ export default {
             {
               id: this.clientModel.id,
               name: this.clientModel.name,
-              phone: this.clientModel.phone,
+              phone: phoneNumberFormatter(this.clientModel.phone),
             }
           )
             .then(() => {
