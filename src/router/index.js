@@ -1,8 +1,10 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from '../views/Home.vue'
-import Configuration from '../views/Configuration.vue'
 import Login from '../views/Login.vue'
+import Home from '../views/Home.vue'
+import Clients from '../views/Clients.vue'
+import WSServer from '../views/WSServer.vue'
+import About from '../views/About.vue'
 import {
   getAuth,
   onAuthStateChanged,
@@ -12,7 +14,15 @@ Vue.use(Router)
 
 const routes = [
   {
-    path: '/',
+    path: '/login',
+    name: 'login',
+    component: Login,
+    meta: {
+      requiresGuest: true
+    }
+  },
+  {
+    path: '/home',
     name: 'home',
     component: Home,
     meta: {
@@ -20,25 +30,30 @@ const routes = [
     }
   },
   {
-    path: '/login',
-    name: 'login',
-    component: Login,
-    meta: {
-      requiresGuest: true
-    }
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    //component: () => import(/* webpackChunkName: "login" */ '../views/Login.vue')
-  },
-  {
-    path: '/Configuration',
-    name: 'configuration',
-    component: Configuration,
+    path: '/clients',
+    name: 'clients',
+    component: Clients,
     meta: {
       requiresAuth: true
     }
-  }
+  },
+  {
+    path: '/WSServer',
+    name: 'wsserver',
+    component: WSServer,
+    meta: {
+      requiresAuth: true
+    },
+
+  },
+  {
+    path: '/about',
+    name: 'about',
+    component: About,
+    meta: {
+      requiresAuth: true
+    }
+  },
 ]
 
 const router = new Router({
@@ -71,7 +86,7 @@ router.beforeEach((to, from, next) => {
       if (user) {
         // go to home page
         next({
-          path: '/',
+          path: '/home',
           query: {
             redirect: to.fullPath
           }
