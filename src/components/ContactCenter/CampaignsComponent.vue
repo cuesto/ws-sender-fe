@@ -4,14 +4,14 @@
       <v-data-table
         :headers="headers"
         :search="search"
-        :items="clients"
+        :items="campaigns"
         :loading="loadingtable"
         sort-by="name"
         class="elevation-1"
       >
         <template v-slot:top>
           <v-toolbar flat color="white">
-            <v-toolbar-title>Clientes</v-toolbar-title>
+            <v-toolbar-title>Campañas</v-toolbar-title>
             <v-divider class="mx-4" inset vertical></v-divider>
             <v-spacer></v-spacer>
             <v-text-field
@@ -26,7 +26,7 @@
             <v-dialog v-model="dialog" persistent max-width="600px">
               <template v-slot:activator="{ on }">
                 <v-btn color="green" dark v-on="on">
-                  <v-icon left dark>person_add</v-icon>Agregar
+                  <v-icon left dark>person_add</v-icon>Agregar Plantilla
                 </v-btn>
               </template>
               <v-form ref="form">
@@ -39,24 +39,23 @@
                       <v-row>
                         <v-col cols="12" sm="6" md="6">
                           <v-text-field
-                            label="Código*"
+                            label="Id*"
                             :rules="[rules.required]"
-                            v-model="clientModel.id"
+                            v-model="campaignModel.id"
                           ></v-text-field>
                         </v-col>
                         <v-col cols="12" sm="6" md="6">
                           <v-text-field
                             label="Nombre*"
                             :rules="[rules.required]"
-                            v-model="clientModel.name"
+                            v-model="campaignModel.name"
                           ></v-text-field>
                         </v-col>
                         <v-col cols="12" sm="6" md="6">
                           <v-text-field
-                            label="Celular*"
+                            label="Contenido*"
                             :rules="[rules.required]"
-                            v-mask="mask"
-                            v-model="clientModel.phone"
+                            v-model="campaignModel.content"
                           ></v-text-field>
                         </v-col>
                       </v-row>
@@ -75,68 +74,6 @@
                 </v-card>
               </v-form>
             </v-dialog>
-            <v-dialog v-model="uploadModal" max-width="500px">
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  :loading="loadingUploadBtn"
-                  :disabled="disableUploadBtn"
-                  color="orange"
-                  dark
-                  v-on="on"
-                  class="mx-3"
-                >
-                  <v-icon left dark>mdi-cloud-upload</v-icon>Importar
-                </v-btn>
-              </template>
-              <v-card>
-                <v-card-title>
-                  <span class="headline">Importar Clientes</span>
-                </v-card-title>
-                <v-card-text>
-                  <v-container>
-                    <v-row>
-                      <v-file-input
-                        v-model="file"
-                        accept="file/*.csv"
-                        label="Cargar plantilla .csv"
-                      ></v-file-input>
-                      <v-tooltip top>
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-btn
-                            class="ma-2"
-                            v-bind="attrs"
-                            v-on="on"
-                            href="template.csv"
-                            dark
-                            download
-                          >
-                            <v-icon dark> mdi-cloud-download </v-icon>
-                          </v-btn>
-                        </template>
-                        <span>Descargar Plantilla</span>
-                      </v-tooltip>
-                      <v-spacer></v-spacer>
-                    </v-row>
-                    <v-row>
-                      <v-btn
-                        @click="UploadClientsTemplate()"
-                        color="orange"
-                        dark
-                      >
-                        <v-icon left>mdi-cloud-upload</v-icon>Importar
-                      </v-btn>
-                      <v-btn
-                        class="mx-3"
-                        @click="hideUploadModal()"
-                        color="blue darken-1"
-                        text
-                        >Cancelar</v-btn
-                      >
-                    </v-row>
-                  </v-container>
-                </v-card-text>
-              </v-card>
-            </v-dialog>
           </v-toolbar>
         </template>
         <template #[`item.actions`]="{ item }">
@@ -153,7 +90,7 @@
           >
         </template>
         <template v-slot:no-data>
-          <v-btn color="primary" @click="getClients">
+          <v-btn color="primary" @click="getCampaigns">
             <v-icon left dark>autorenew</v-icon>Refrescar
           </v-btn>
         </template>
@@ -163,7 +100,7 @@
 </template>
 <script>
 import { getAuth } from "firebase/auth";
-import { firebaseApp } from "../firebase";
+import { firebaseApp } from "../../firebase";
 import {
   getFirestore,
   doc,
@@ -172,27 +109,26 @@ import {
   deleteDoc,
   collection,
 } from "firebase/firestore";
-import ClientModel from "../models/ClientModel";
+import CampaignModel from "../../models/CampaignModel";
 import { mask } from "vue-the-mask";
-import Papa from "papaparse";
-const { phoneNumberFormatter } = require("../helpers/formatter");
+const { phoneNumberFormatter } = require("../../helpers/formatter");
 
 const auth = getAuth();
 const db = getFirestore(firebaseApp);
-const clientssRef = collection(db, "profiles");
+const profilessRef = collection(db, "profiles");
 
 export default {
   directives: {
     mask,
   },
   data: () => ({
-    clients: [],
+    campaigns: [],
     mask: "##########",
     dialog: false,
     headers: [
       { text: "Id", sortable: true, value: "id" },
       { text: "Nombre", sortable: true, value: "name" },
-      { text: "Celular", sortable: false, value: "phone" },
+      { text: "Contenido", sortable: false, value: "content" },
       { text: "Opciones", value: "actions", sortable: false },
     ],
     rules: {
@@ -200,17 +136,14 @@ export default {
     },
     search: "",
     editedIndex: -1,
-    clientModel: new ClientModel(),
-    fileProcessed: null,
-    file: null,
-    uploadModal: false,
-    loadingUploadBtn: false,
-    disableUploadBtn: false,
-    loadingtable:false
+    campaignModel: new CampaignModel(),
+    loadingtable: false,
   }),
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "Nuevo Cliente" : "Actualizar Cliente";
+      return this.editedIndex === -1
+        ? "Nueva Plantilla"
+        : "Actualizar Plantilla";
     },
   },
   watch: {
@@ -221,7 +154,7 @@ export default {
   },
   mounted() {},
   created() {
-    //this.getClients();
+    //this.getCampaigns();
   },
   methods: {
     displayNotification(type, message) {
@@ -234,89 +167,19 @@ export default {
       });
     },
 
-    UploadClientsTemplate() {
-      if (this.file == null) {
-        this.displayNotification(
-          "error",
-          "El archivo es de un formato incorrecto o no se ha cargado."
-        );
-        return;
-      }
-
-      this.loadingUploadBtn = true;
-      this.uploadModal = false;
-
-      let me = this;
-      let customersList = [];
-
-      Papa.parse(this.file, {
-        header: true,
-        complete: function (results) {
-          me.fileProcessed = results.data;
-          customersList = results.data.map((a) => {
-            return {
-              id: a.Id,
-              name: a.Nombre,
-              phone: a.Celular,
-            };
-          });
-
-          customersList = customersList.filter(
-            (x) =>
-              x.id != undefined &&
-              x.id != "" &&
-              x.name != undefined &&
-              x.name != "" &&
-              x.phone != undefined &&
-              x.phone != ""
-          );
-
-          if (customersList.length == 0) {
-            me.displayNotification(
-              "error",
-              "No se pudo procesar el archivo, revise el formato."
-            );
-            return;
-          }
-          console.log(customersList);
-          customersList.forEach((a) => {
-            setDoc(doc(clientssRef, auth.currentUser.uid, "clients", a.id), {
-              id: a.id,
-              name: a.name,
-              phone: phoneNumberFormatter(a.phone),
-            })
-              .then(() => {})
-              .catch((error) => {
-                console.log(error.message);
-                me.loadingUploadBtn = false;
-              });
-          });
-        },
-      });
-
-      me.loadingUploadBtn = false;
-      me.file = null;
-
-      me.displayNotification(
-        "success",
-        "Se cargaron los registros correctamente."
-      );
-      me.getClients();
-    },
-
-    async getClients() {
+    async getCampaigns() {
       this.loadingtable = true;
-      this.clients = [];
+      this.campaigns = [];
       let me = this;
       const querySnapshot = await getDocs(
-        collection(db, "profiles/" + auth.currentUser.uid + "/clients")
+        collection(db, "profiles/" + auth.currentUser.uid + "/campaigns")
       )
         .then(() => {
           querySnapshot.forEach((doc) => {
-            this.clients.push({
+            this.campaigns.push({
               id: doc.data().id,
               name: doc.data().name,
-              phone: doc.data().phone,
+              content: doc.data().content,
             });
           });
         })
@@ -330,7 +193,7 @@ export default {
 
     editItem(item) {
       this.editedIndex = this.clients.indexOf(item);
-      this.clientModel = Object.assign({}, item);
+      this.campaignModel = Object.assign({}, item);
       this.dialog = true;
     },
 
@@ -348,11 +211,11 @@ export default {
         .then((result) => {
           if (result.value) {
             deleteDoc(
-              doc(clientssRef, auth.currentUser.uid, "clients", item.id)
+              doc(profilessRef, auth.currentUser.uid, "campaigns", item.id)
             )
               .then(() => {
                 this.close();
-                this.getClients();
+                this.getCampaigns();
                 this.clean();
                 this.displayNotification(
                   "success",
@@ -370,16 +233,20 @@ export default {
       if (this.$refs.form.validate()) {
         setDoc(
           doc(
-            clientssRef,
+            profilessRef,
             auth.currentUser.uid,
-            "clients",
-            this.clientModel.id
+            "campaigns",
+            this.campaignModel.id
           ),
-          this.clientModel
+          {
+            id: this.campaignModel.id,
+            name: this.campaignModel.name,
+            content: this.campaignModel.content,
+          }
         )
           .then(() => {
             this.close();
-            this.getClients();
+            //this.getCampaigns();
             this.clean();
             this.displayNotification(
               "success",
@@ -395,17 +262,12 @@ export default {
     close() {
       this.dialog = false;
       setTimeout(() => {
-        this.clientModel = Object.assign({}, this.defaultItem);
+        this.campaignModel = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
       }, 300);
     },
     clean() {
-      this.clientModel = new ClientModel();
-    },
-
-    hideUploadModal() {
-      this.uploadModal = false;
-      this.file = null;
+      this.campaignModel = new ClientModel();
     },
   },
 };

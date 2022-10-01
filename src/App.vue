@@ -34,7 +34,7 @@
                 </v-list-item-icon>
                 <v-list-item-title>Grupos</v-list-item-title>
               </v-list-item>
-              <v-list-item>
+              <v-list-item :to="{ name: 'campaigns' }">
                 <v-list-item-icon>
                   <v-icon>mdi-send</v-icon>
                 </v-list-item-icon>
