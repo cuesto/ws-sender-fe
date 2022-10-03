@@ -307,25 +307,17 @@ export default {
     async getClients() {
       this.loadingtable = true;
       this.clients = [];
-      let me = this;
       const querySnapshot = await getDocs(
         collection(db, "profiles/" + auth.currentUser.uid + "/clients")
-      )
-        .then(() => {
-          querySnapshot.forEach((doc) => {
-            this.clients.push({
-              id: doc.data().id,
-              name: doc.data().name,
-              phone: doc.data().phone,
-            });
-          });
-        })
-        .catch(function (error) {
-          me.displayNotification("error", error.message);
-        })
-        .finally(() => {
-          me.loadingtable = false;
+      );
+      querySnapshot.forEach((doc) => {
+        this.clients.push({
+          id: doc.data().id,
+          name: doc.data().name,
+          phone: doc.data().phone,
         });
+      });
+      this.loadingtable = false;
     },
 
     editItem(item) {
@@ -352,7 +344,7 @@ export default {
             )
               .then(() => {
                 this.close();
-                this.getClients();
+                //this.getClients();
                 this.clean();
                 this.displayNotification(
                   "success",
@@ -379,7 +371,7 @@ export default {
         )
           .then(() => {
             this.close();
-            this.getClients();
+            //this.getClients();
             this.clean();
             this.displayNotification(
               "success",

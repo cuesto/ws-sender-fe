@@ -170,29 +170,22 @@ export default {
     async getCampaigns() {
       this.loadingtable = true;
       this.campaigns = [];
-      let me = this;
+     
       const querySnapshot = await getDocs(
         collection(db, "profiles/" + auth.currentUser.uid + "/campaigns")
-      )
-        .then(() => {
-          querySnapshot.forEach((doc) => {
-            this.campaigns.push({
-              id: doc.data().id,
-              name: doc.data().name,
-              content: doc.data().content,
-            });
-          });
-        })
-        .catch(function (error) {
-          me.displayNotification("error", error.message);
-        })
-        .finally(() => {
-          me.loadingtable = false;
+      );
+      querySnapshot.forEach((doc) => {
+        this.campaigns.push({
+          id: doc.data().id,
+          name: doc.data().name,
+          content: doc.data().content,
         });
+      });
+      this.loadingtable = false;
     },
 
     editItem(item) {
-      this.editedIndex = this.clients.indexOf(item);
+      this.editedIndex = this.campaigns.indexOf(item);
       this.campaignModel = Object.assign({}, item);
       this.dialog = true;
     },
@@ -215,7 +208,7 @@ export default {
             )
               .then(() => {
                 this.close();
-                this.getCampaigns();
+                //this.getCampaigns();
                 this.clean();
                 this.displayNotification(
                   "success",
@@ -254,6 +247,7 @@ export default {
             );
           })
           .catch(function (error) {
+            console.log(error);
             this.displayNotification("error", error.message);
           });
       }
@@ -267,7 +261,7 @@ export default {
       }, 300);
     },
     clean() {
-      this.campaignModel = new ClientModel();
+      this.campaignModel = new CampaignModel();
     },
   },
 };
