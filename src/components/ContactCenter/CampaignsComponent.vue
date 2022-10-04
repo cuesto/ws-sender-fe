@@ -95,14 +95,14 @@
           <v-textarea disabled v-model="item.content"> </v-textarea>
         </template>
         <template #[`item.actions`]="{ item }">
-          <v-container bg grid-list-md text-xs-center>
-            <v-row>
+          <v-container>
+            <v-row justify="center" align="center">
+              <v-btn color="green" dark>Campaña </v-btn>
+            </v-row>
+            <v-row justify="center" align="center">
               <v-btn color="orange" dark class="my-4">
                 Mensaje Individual
               </v-btn>
-            </v-row>
-            <v-row>
-              <v-btn color="green" dark> Mensaje Campaña </v-btn>
             </v-row>
           </v-container>
         </template>
