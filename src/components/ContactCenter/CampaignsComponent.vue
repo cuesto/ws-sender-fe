@@ -8,6 +8,7 @@
         :loading="loadingtable"
         sort-by="name"
         class="elevation-1"
+        dense
       >
         <template v-slot:top>
           <v-toolbar flat color="white">
@@ -25,7 +26,7 @@
             <v-spacer></v-spacer>
             <v-dialog v-model="dialog" persistent max-width="600px">
               <template v-slot:activator="{ on }">
-                <v-btn color="green" dark v-on="on">
+                <v-btn color="blue" dark v-on="on">
                   <v-icon left dark>person_add</v-icon>Agregar Plantilla
                 </v-btn>
               </template>
@@ -51,12 +52,13 @@
                             v-model="campaignModel.name"
                           ></v-text-field>
                         </v-col>
-                        <v-col cols="12" sm="6" md="6">
-                          <v-text-field
-                            label="Contenido*"
+                        <v-col cols="12" sm="12" md="12">
+                          <v-textarea
+                            label="Contenido"
                             :rules="[rules.required]"
+                            append-icon="mdi-comment-text"
                             v-model="campaignModel.content"
-                          ></v-text-field>
+                          ></v-textarea>
                         </v-col>
                       </v-row>
                     </v-container>
@@ -76,7 +78,7 @@
             </v-dialog>
           </v-toolbar>
         </template>
-        <template #[`item.actions`]="{ item }">
+        <template #[`item.options`]="{ item }">
           <v-icon
             size="sm"
             variant="outline-info"
@@ -88,6 +90,21 @@
           <v-icon size="sm" color="red" class="mr-1" @click="deleteItem(item)"
             >delete</v-icon
           >
+        </template>
+        <template #[`item.content`]="{ item }">
+          <v-textarea disabled v-model="item.content"> </v-textarea>
+        </template>
+        <template #[`item.actions`]="{ item }">
+          <v-container bg grid-list-md text-xs-center>
+            <v-row>
+              <v-btn color="orange" dark class="my-4">
+                Mensaje Individual
+              </v-btn>
+            </v-row>
+            <v-row>
+              <v-btn color="green" dark> Mensaje Campaña </v-btn>
+            </v-row>
+          </v-container>
         </template>
         <template v-slot:no-data>
           <v-btn color="primary" @click="getCampaigns">
@@ -122,14 +139,22 @@ export default {
     mask,
   },
   data: () => ({
-    campaigns: [],
+    campaigns: [
+      {
+        id: "CPN001",
+        name: "Notificación Paquetes Disponibles",
+        content:
+          "¡Hola {nombre}! 👋🏻, Te escribimos de *Domex Herrera*📦 para informarte que tu(s) paquete(s) está(n) disponible(s)🎉.\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio 🚚 *GRATIS* o puede pasarlo a retirar por la sucursal 🙌🏻.",
+      },
+    ],
     mask: "##########",
     dialog: false,
     headers: [
+      { text: "Opciones", value: "options", sortable: false },
       { text: "Id", sortable: true, value: "id" },
       { text: "Nombre", sortable: true, value: "name" },
       { text: "Contenido", sortable: false, value: "content" },
-      { text: "Opciones", value: "actions", sortable: false },
+      { text: "Acciones", value: "actions", sortable: false, align: "center" },
     ],
     rules: {
       required: (value) => !!value || "Requerido.",
@@ -170,7 +195,7 @@ export default {
     async getCampaigns() {
       this.loadingtable = true;
       this.campaigns = [];
-     
+
       const querySnapshot = await getDocs(
         collection(db, "profiles/" + auth.currentUser.uid + "/campaigns")
       );
