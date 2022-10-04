@@ -97,10 +97,18 @@
         <template #[`item.actions`]="{ item }">
           <v-container>
             <v-row justify="center" align="center">
-              <v-btn color="green" dark @click="showMessageModal">Campaña </v-btn>
+              <v-btn color="green" dark @click="showMessageModal" block
+                >Campaña
+              </v-btn>
             </v-row>
             <v-row justify="center" align="center">
-              <v-btn color="orange" dark class="my-4" @click="showMessageModal">
+              <v-btn
+                color="orange"
+                dark
+                class="my-4"
+                @click="showSingleMessageModal"
+                block
+              >
                 Mensaje Individual
               </v-btn>
             </v-row>
@@ -112,6 +120,51 @@
           </v-btn>
         </template>
       </v-data-table>
+      <v-dialog v-model="messageModal" persistent max-width="600px">
+        <v-form ref="formCampaign">
+          <v-card>
+            <v-card-title>
+              <span class="headline">{{ headerModalMessage }}</span>
+            </v-card-title>
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col cols="12" sm="12" md="12">
+                    <v-text-field
+                      v-if="showPhoneOnModal"
+                      label="Celular"
+                      hint="8094445555"
+                      v-mask="mask"
+                      :rules="[rules.required]"
+                      append-icon="mdi-phone"
+                      v-model="messageModel.phone"
+                      single-line
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="12" md="12">
+                    <v-textarea
+                      label="Mensaje"
+                      :hint="hintMessage"
+                      :rules="[rules.required]"
+                      append-icon="mdi-comment-text"
+                      v-model="messageModel.message"
+                    ></v-textarea>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue darken-1" text @click="closeMessageModal()"
+                >Cerrar</v-btn
+              >
+              <v-btn color="blue darken-1" text @click="sendMessage">
+                Enviar<v-icon right dark>mdi-send</v-icon>
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-form>
+      </v-dialog>
     </v-flex>
   </v-layout>
 </template>
@@ -165,8 +218,8 @@ export default {
     campaignModel: new CampaignModel(),
     loadingtable: false,
     messageModal: false,
-      messageModel: new MessageModel(),
-         headerModalMessage: "",
+    messageModel: new MessageModel(),
+    headerModalMessage: "",
   }),
   computed: {
     formTitle() {
@@ -177,8 +230,9 @@ export default {
   },
   watch: {
     dialog(val) {
-      val || this.close();
-      if (this.$refs.form != undefined) this.$refs.form.resetValidation();
+      val || this.closeMessageModal();
+      if (this.$refs.formCampaign != undefined)
+        this.$refs.formCampaign.resetValidation();
     },
   },
   mounted() {},
@@ -282,13 +336,20 @@ export default {
       }
     },
 
-    async showMessageModal() {
+    showSingleMessageModal() {
+      this.headerModalMessage = "Mensaje de Prueba";
+      this.messageModal = true;
+      this.hintMessage = "Insertar texto.";
+      this.showPhoneOnModal = true;
+    },
+
+    showMessageModal() {
       this.headerModalMessage = "Mensaje Masivo";
       this.messageModal = true;
       this.hintMessage =
         "Lo que está dentro de llaves {} debe ser un campo de la tabla";
       this.showPhoneOnModal = false;
-      
+
       this.messageModel.message =
         "¡Hola {nombre}! 👋🏻, Te escribimos de *Domex Herrera*📦 para informarte que tu(s) paquete(s) está(n) disponible(s)🎉.\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio 🚚 *GRATIS* o puede pasarlo a retirar por la sucursal 🙌🏻.";
     },
@@ -300,6 +361,14 @@ export default {
         this.editedIndex = -1;
       }, 300);
     },
+
+    closeMessageModal() {
+      this.messageModal = false;
+      setTimeout(() => {
+        this.messageModel = Object.assign({}, this.defaultItem);
+      }, 300);
+    },
+
     clean() {
       this.campaignModel = new CampaignModel();
     },
