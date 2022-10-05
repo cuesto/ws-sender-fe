@@ -97,13 +97,13 @@
         <template #[`item.actions`]="{ item }">
           <v-container>
             <v-row justify="center" align="center">
-              <v-btn color="green" dark @click="showMessageModal" block
+              <v-btn color="indigo" dark @click="showMessageModal(item)" block
                 >Campaña
               </v-btn>
             </v-row>
             <v-row justify="center" align="center">
               <v-btn
-                color="orange"
+                color="brown"
                 dark
                 class="my-4"
                 @click="showSingleMessageModal"
@@ -120,50 +120,111 @@
           </v-btn>
         </template>
       </v-data-table>
-      <v-dialog v-model="messageModal" persistent max-width="600px">
-        <v-form ref="formCampaign">
-          <v-card>
-            <v-card-title>
-              <span class="headline">{{ headerModalMessage }}</span>
-            </v-card-title>
-            <v-card-text>
-              <v-container>
-                <v-row>
-                  <v-col cols="12" sm="12" md="12">
+      <v-dialog v-model="messageModal" persistent max-width="1000px">
+        <v-card class="mx-auto">
+          <v-card-title>
+            <span class="headline">{{ campaignModel.name }}</span>
+            <v-spacer></v-spacer>
+                 <v-btn icon @click="messageModal = false" >
+                  <v-icon>mdi-close</v-icon>
+                </v-btn>
+          </v-card-title>
+          <v-card-text>
+            <v-container fluid>
+              <v-row dense>
+                <v-col cols="6">
+                  <v-card class="pa-md-4 mx-lg-auto">
+                    <v-text-field
+                      label="Id Campaña"
+                      v-model="campaignModel.id"
+                      disabled
+                      single-line
+                    ></v-text-field>
+                    <v-textarea
+                      label="Mensaje"
+                      v-model="campaignModel.content"
+                    ></v-textarea>
                     <v-text-field
                       v-if="showPhoneOnModal"
                       label="Celular"
                       hint="8094445555"
                       v-mask="mask"
                       :rules="[rules.required]"
-                      append-icon="mdi-phone"
                       v-model="messageModel.phone"
                       single-line
                     ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="12" md="12">
-                    <v-textarea
-                      label="Mensaje"
-                      :hint="hintMessage"
-                      :rules="[rules.required]"
-                      append-icon="mdi-comment-text"
-                      v-model="messageModel.message"
-                    ></v-textarea>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="closeMessageModal()"
-                >Cerrar</v-btn
-              >
-              <v-btn color="blue darken-1" text @click="sendMessage">
-                Enviar<v-icon right dark>mdi-send</v-icon>
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-form>
+                    <v-file-input
+                      v-model="file"
+                      accept="file/*.jpg"
+                      label="Anexar Imagen"
+                    ></v-file-input>
+                  </v-card>
+                </v-col>
+                <v-col cols="5">
+                  <v-card class="pa-md-4 mx-lg-auto">
+                    <v-virtual-scroll
+                      :items="items"
+                      height="345"
+                      item-height="55"
+                    >
+                      <template v-slot:default="{ item }">
+                        <v-list>
+                          <v-list-item :key="item">
+                            <v-list-item-content>
+                              <v-list-item-title
+                                v-text="item.text"
+                              ></v-list-item-title>
+                            </v-list-item-content>
+                            <v-list-item-action>
+                              <v-icon
+                                small
+                                size="sm"
+                                variant="outline-info"
+                                color="green"
+                                class="mr-1"
+                                >done</v-icon
+                              >
+                              <v-icon
+                                small
+                                size="sm"
+                                variant="outline-info"
+                                color="red"
+                                class="mr-1"
+                                >mdi-alert-circle-outline</v-icon
+                              >
+                            </v-list-item-action>
+                          </v-list-item>
+                        </v-list>
+                      </template>
+                    </v-virtual-scroll>
+
+                    <v-btn dark color="blue" class="my-1" block
+                      >Enviar mensaje</v-btn
+                    >
+                  </v-card>
+                </v-col>
+                <v-col>
+                  <v-container>
+                    <v-row justify="end" align="center">
+                      <v-btn class="my-1"
+                        ><v-icon dark>mdi-filter</v-icon></v-btn
+                      >
+                    </v-row>
+                  </v-container>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
+          <!-- <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" text @click="closeMessageModal()"
+              >Cerrar</v-btn
+            >
+            <v-btn color="blue darken-1" text @click="sendMessage">
+              Enviar<v-icon right dark>mdi-send</v-icon>
+            </v-btn>
+          </v-card-actions> -->
+        </v-card>
       </v-dialog>
     </v-flex>
   </v-layout>
@@ -220,6 +281,27 @@ export default {
     messageModal: false,
     messageModel: new MessageModel(),
     headerModalMessage: "",
+    file: null,
+    items: [
+      { text: "Real-Time", icon: "mdi-clock" },
+      { text: "Audience", icon: "mdi-account" },
+      { text: "Conversions", icon: "mdi-flag" },
+      { text: "Real-Time", icon: "mdi-clock" },
+      { text: "Audience", icon: "mdi-account" },
+      { text: "Conversions", icon: "mdi-flag" },
+      { text: "Real-Time", icon: "mdi-clock" },
+      { text: "Audience", icon: "mdi-account" },
+      { text: "Conversions", icon: "mdi-flag" },
+      { text: "Real-Time", icon: "mdi-clock" },
+      { text: "Audience", icon: "mdi-account" },
+      { text: "Conversions", icon: "mdi-flag" },
+      { text: "Real-Time", icon: "mdi-clock" },
+      { text: "Audience", icon: "mdi-account" },
+      { text: "Conversions", icon: "mdi-flag" },
+      { text: "Real-Time", icon: "mdi-clock" },
+      { text: "Audience", icon: "mdi-account" },
+      { text: "Conversions", icon: "mdi-flag" },
+    ],
   }),
   computed: {
     formTitle() {
@@ -227,16 +309,23 @@ export default {
         ? "Nueva Plantilla"
         : "Actualizar Plantilla";
     },
+    items() {
+      return Array.from({ length: this.length }, (k, v) => v + 1);
+    },
+    length() {
+      return 7000;
+    },
   },
   watch: {
     dialog(val) {
       val || this.closeMessageModal();
-      if (this.$refs.formCampaign != undefined)
-        this.$refs.formCampaign.resetValidation();
+      // if (this.$refs.formCampaign != undefined)
+      //   this.$refs.formCampaign.resetValidation();
     },
   },
   mounted() {},
   created() {
+    this.showSingleMessageModal();
     //this.getCampaigns();
   },
   methods: {
@@ -337,13 +426,17 @@ export default {
     },
 
     showSingleMessageModal() {
-      this.headerModalMessage = "Mensaje de Prueba";
+      //this.headerModalMessage = "Mensaje de Prueba";
       this.messageModal = true;
       this.hintMessage = "Insertar texto.";
       this.showPhoneOnModal = true;
     },
 
-    showMessageModal() {
+    showMessageModal(item) {
+      this.campaignModel.name = item.name;
+      this.campaignModel.id = item.id;
+      this.campaignModel.content = item.content;
+
       this.headerModalMessage = "Mensaje Masivo";
       this.messageModal = true;
       this.hintMessage =
