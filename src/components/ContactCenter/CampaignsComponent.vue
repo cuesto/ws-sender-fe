@@ -97,19 +97,19 @@
         <template #[`item.actions`]="{ item }">
           <v-container>
             <v-row justify="center" align="center">
-              <v-btn color="indigo" dark @click="showMessageModal(item)" block
-                >Campaña
-              </v-btn>
-            </v-row>
-            <v-row justify="center" align="center">
               <v-btn
                 color="brown"
                 dark
                 class="my-4"
-                @click="showSingleMessageModal"
+                @click="showSingleMessageModal(item)"
                 block
               >
                 Mensaje Individual
+              </v-btn>
+            </v-row>
+            <v-row justify="center" align="center">
+              <v-btn color="indigo" dark @click="showMessageModal(item)" block
+                >Campaña
               </v-btn>
             </v-row>
           </v-container>
@@ -125,9 +125,9 @@
           <v-card-title>
             <span class="headline">{{ campaignModel.name }}</span>
             <v-spacer></v-spacer>
-                 <v-btn icon @click="messageModal = false" >
-                  <v-icon>mdi-close</v-icon>
-                </v-btn>
+            <v-btn icon @click="closeMessageModal()">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
           </v-card-title>
           <v-card-text>
             <v-container fluid>
@@ -206,7 +206,7 @@
                 <v-col>
                   <v-container>
                     <v-row justify="end" align="center">
-                      <v-btn class="my-1"
+                      <v-btn class="my-1" @click="showfilterClientsModal()"
                         ><v-icon dark>mdi-filter</v-icon></v-btn
                       >
                     </v-row>
@@ -215,15 +215,30 @@
               </v-row>
             </v-container>
           </v-card-text>
-          <!-- <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" text @click="closeMessageModal()"
-              >Cerrar</v-btn
-            >
-            <v-btn color="blue darken-1" text @click="sendMessage">
-              Enviar<v-icon right dark>mdi-send</v-icon>
-            </v-btn>
-          </v-card-actions> -->
+        </v-card>
+      </v-dialog>
+      <v-dialog v-model="filterClientsModal" max-width="500px">
+        <v-card>
+          <v-card-title>
+            <span class="headline">Buscar Clientes por código</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <v-textarea v-model="clientsIds"> </v-textarea>
+              </v-row>
+              <v-row>
+                <v-btn
+                  color="orange"
+                  dark
+                  class="my-1"
+                  @click="getClientsByIds()"
+                >
+                  <v-icon left dark>mdi-filter</v-icon>Aplicar</v-btn
+                >
+              </v-row>
+            </v-container>
+          </v-card-text>
         </v-card>
       </v-dialog>
     </v-flex>
@@ -243,7 +258,7 @@ import {
 import CampaignModel from "../../models/CampaignModel";
 import MessageModel from "../../models/MessageModel";
 import { mask } from "vue-the-mask";
-const { phoneNumberFormatter } = require("../../helpers/formatter");
+//const { phoneNumberFormatter } = require("../../helpers/formatter");
 
 const auth = getAuth();
 const db = getFirestore(firebaseApp);
@@ -282,6 +297,7 @@ export default {
     messageModel: new MessageModel(),
     headerModalMessage: "",
     file: null,
+    showPhoneOnModal: true,
     items: [
       { text: "Real-Time", icon: "mdi-clock" },
       { text: "Audience", icon: "mdi-account" },
@@ -301,19 +317,35 @@ export default {
       { text: "Real-Time", icon: "mdi-clock" },
       { text: "Audience", icon: "mdi-account" },
       { text: "Conversions", icon: "mdi-flag" },
+      { text: "Real-Time", icon: "mdi-clock" },
+      { text: "Audience", icon: "mdi-account" },
+      { text: "Conversions", icon: "mdi-flag" },
+      { text: "Real-Time", icon: "mdi-clock" },
+      { text: "Audience", icon: "mdi-account" },
+      { text: "Conversions", icon: "mdi-flag" },
+      { text: "Real-Time", icon: "mdi-clock" },
+      { text: "Audience", icon: "mdi-account" },
+      { text: "Conversions", icon: "mdi-flag" },
+      { text: "Real-Time", icon: "mdi-clock" },
+      { text: "Audience", icon: "mdi-account" },
+      { text: "Conversions", icon: "mdi-flag" },
+      { text: "Real-Time", icon: "mdi-clock" },
+      { text: "Audience", icon: "mdi-account" },
+      { text: "Conversions", icon: "mdi-flag" },
+      { text: "Real-Time", icon: "mdi-clock" },
+      { text: "Audience", icon: "mdi-account" },
+      { text: "Conversions", icon: "mdi-flag" },
     ],
+    clients: [],
+    filterClientsModal: false,
+    clientsIds:
+      "D01-270782\nD01-098634\nD01-266253\nD01-266253\nD01-266253\nD01-266253\n\n\n",
   }),
   computed: {
     formTitle() {
       return this.editedIndex === -1
         ? "Nueva Plantilla"
         : "Actualizar Plantilla";
-    },
-    items() {
-      return Array.from({ length: this.length }, (k, v) => v + 1);
-    },
-    length() {
-      return 7000;
     },
   },
   watch: {
@@ -325,7 +357,6 @@ export default {
   },
   mounted() {},
   created() {
-    this.showSingleMessageModal();
     //this.getCampaigns();
   },
   methods: {
@@ -354,6 +385,57 @@ export default {
         });
       });
       this.loadingtable = false;
+    },
+
+    async getClients() {
+      this.clients = [
+        {
+          id: "D01-264423",
+          name: "Shamelis",
+          phone: "8096015222",
+        },
+        {
+          id: "D01-098634",
+          name: "Shamelis",
+          phone: "8096015222",
+        },
+        {
+          id: "D01-266253",
+          name: "Shamelis",
+          phone: "8096015222",
+        },
+      ];
+    },
+
+    async getClientsByIds() {
+      this.filterClientsModal = false;
+      let clientsIdsArray;
+      clientsIdsArray = this.clientsIds.split("\n");
+      clientsIdsArray = [...new Set(clientsIdsArray)];
+      clientsIdsArray = clientsIdsArray.filter(function (el) {
+        return el != "";
+      });
+
+      console.log(clientsIdsArray);
+
+      const querySnapshot = await getDocs(
+        collection(db, "profiles/" + auth.currentUser.uid + "/clients", where('id', 'in', clientsIdsArray))
+      );
+      querySnapshot.forEach((doc) => {
+        this.clients.push({
+          id: doc.data().id,
+          name: doc.data().name,
+          phone: doc.data().phone,
+        });
+      });
+
+      console.log(this.clients);
+
+      // let clients = this.getClients();
+      // //clientsIdsArray.forEach()
+      // //myArray.find(x => x.id === '45').foo;
+      // var a = clients.find(x=>x.id ==="D01-266253");
+      // console.log(a)
     },
 
     editItem(item) {
@@ -425,11 +507,13 @@ export default {
       }
     },
 
-    showSingleMessageModal() {
-      //this.headerModalMessage = "Mensaje de Prueba";
+    showSingleMessageModal(item) {
+      this.campaignModel.name = item.name;
+      this.campaignModel.id = item.id;
+      this.campaignModel.content = item.content;
+
       this.messageModal = true;
-      this.hintMessage = "Insertar texto.";
-      this.showPhoneOnModal = true;
+      //this.showPhoneOnModal = true;
     },
 
     showMessageModal(item) {
@@ -437,14 +521,15 @@ export default {
       this.campaignModel.id = item.id;
       this.campaignModel.content = item.content;
 
-      this.headerModalMessage = "Mensaje Masivo";
       this.messageModal = true;
-      this.hintMessage =
-        "Lo que está dentro de llaves {} debe ser un campo de la tabla";
-      this.showPhoneOnModal = false;
+      //this.showPhoneOnModal = false;
 
       this.messageModel.message =
         "¡Hola {nombre}! 👋🏻, Te escribimos de *Domex Herrera*📦 para informarte que tu(s) paquete(s) está(n) disponible(s)🎉.\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio 🚚 *GRATIS* o puede pasarlo a retirar por la sucursal 🙌🏻.";
+    },
+
+    showfilterClientsModal() {
+      this.filterClientsModal = true;
     },
 
     close() {
