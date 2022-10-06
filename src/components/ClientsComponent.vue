@@ -167,7 +167,7 @@ import { firebaseApp } from "../firebase";
 import {
   getFirestore,
   doc,
-  getDocs,
+  getDocsFromCache,
   setDoc,
   deleteDoc,
   collection,
@@ -307,7 +307,7 @@ export default {
     async getClients() {
       this.loadingtable = true;
       this.clients = [];
-      const querySnapshot = await getDocs(
+      const querySnapshot = await getDocsFromCache (
         collection(db, "profiles/" + auth.currentUser.uid + "/clients")
       );
       querySnapshot.forEach((doc) => {

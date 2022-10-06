@@ -105,8 +105,14 @@ import {
   createUserWithEmailAndPassword,
 } from "firebase/auth";
 import { firebaseApp } from "../firebase";
-import { getFirestore, doc, setDoc, collection } from "firebase/firestore";
-
+import {
+  getFirestore,
+  doc,
+  getDocs,
+  setDoc,
+  collection,
+} from "firebase/firestore";
+const auth = getAuth();
 const db = getFirestore(firebaseApp);
 
 export default {
@@ -126,11 +132,13 @@ export default {
     rules: {
       required: (value) => !!value || "Requerido.",
       email: (value) => {
-        const pattern = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+        const pattern =
+          /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
         return pattern.test(value) || "Correo Inválido.";
       },
     },
     error: null,
+    clients: [],
   }),
 
   created() {},
@@ -152,7 +160,7 @@ export default {
           const user = userCredential.user;
           console.log("Logueado:");
           console.log(user);
-          this.$router.go({ path: this.$router.path });
+          this.getClients();
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -202,6 +210,20 @@ export default {
           console.log(errorCode + " - " + errorMessage);
           this.error = errorMessage;
         });
+    },
+
+    async getClients() {
+      this.clients = [];
+      const querySnapshot = await getDocs(
+        collection(db, "profiles/" + auth.currentUser.uid + "/clients")
+      );
+      querySnapshot.forEach((doc) => {
+        this.clients.push({
+          id: doc.data().id,
+          name: doc.data().name,
+          phone: doc.data().phone,
+        });
+      });
     },
   },
 };
