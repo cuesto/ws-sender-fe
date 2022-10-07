@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Login from '../views/Login.vue'
 import Home from '../views/Home.vue'
 import Clients from '../views/Clients.vue'
+import Campaigns from '../views/ContactCenter/Campaigns.vue'
 import WSServer from '../views/WSServer.vue'
 import About from '../views/About.vue'
 import {
@@ -14,7 +15,7 @@ Vue.use(Router)
 
 const routes = [
   {
-    path: '/login',
+    path: '/',
     name: 'login',
     component: Login,
     meta: {
@@ -38,7 +39,15 @@ const routes = [
     }
   },
   {
-    path: '/WSServer',
+    path: '/campaigns',
+    name: 'campaigns',
+    component: Campaigns,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/wsserver',
     name: 'wsserver',
     component: WSServer,
     meta: {
@@ -72,10 +81,10 @@ router.beforeEach((to, from, next) => {
       if (!user) {
         // go to login page
         next({
-          path: '/login',
-          query: {
-            redirect: to.fullPath
-          }
+          path: '/',
+          // query: {
+          //   redirect: to.fullPath
+          // }
         });
       } else {
         next();
