@@ -97,19 +97,8 @@
         <template #[`item.actions`]="{ item }">
           <v-container>
             <v-row justify="center" align="center">
-              <v-btn
-                color="brown"
-                dark
-                class="my-4"
-                @click="showSingleMessageModal(item)"
-                block
-              >
-                Mensaje Individual
-              </v-btn>
-            </v-row>
-            <v-row justify="center" align="center">
-              <v-btn color="indigo" dark @click="showMessageModal(item)" block
-                >Campaña
+              <v-btn color="#ee0290" dark @click="showMessageModal(item)" block
+                ><v-icon left dark>mdi-rocket-launch</v-icon>Lanzar Campaña
               </v-btn>
             </v-row>
           </v-container>
@@ -145,14 +134,18 @@
                       v-model="campaignModel.content"
                     ></v-textarea>
                     <v-text-field
-                      v-if="showPhoneOnModal"
                       label="Celular"
                       hint="8094445555"
                       v-mask="mask"
                       :rules="[rules.required]"
                       v-model="messageModel.phone"
                       single-line
+                      :disabled="!isSingleMessage"
                     ></v-text-field>
+                    <v-switch
+                      v-model="isSingleMessage"
+                      label="Enviar único mensaje"
+                    ></v-switch>
                     <v-file-input
                       v-model="file"
                       accept="file/*.jpg"
@@ -164,7 +157,7 @@
                   <v-card class="pa-md-4 mx-lg-auto">
                     <v-virtual-scroll
                       :items="filteredClients"
-                      height="345"
+                      height="410"
                       item-height="55"
                     >
                       <template v-slot:default="{ item }">
@@ -172,11 +165,18 @@
                           <v-list-item :key="item.id">
                             <v-list-item-content>
                               <v-list-item-title
-                                v-text="item.id +' - ' + item.name + ' - ' + item.phone"
+                                v-text="
+                                  item.id +
+                                  ' - ' +
+                                  item.name +
+                                  ' - ' +
+                                  item.phone
+                                "
                               ></v-list-item-title>
                             </v-list-item-content>
                             <v-list-item-action>
                               <v-icon
+                                v-if="item.isSend"
                                 small
                                 size="sm"
                                 variant="outline-info"
@@ -185,6 +185,7 @@
                                 >done</v-icon
                               >
                               <v-icon
+                                v-if="item.hasError"
                                 small
                                 size="sm"
                                 variant="outline-info"
@@ -198,15 +199,19 @@
                       </template>
                     </v-virtual-scroll>
 
-                    <v-btn dark color="blue" class="my-1" block
-                      >Enviar mensaje</v-btn
+                    <v-btn dark color="green" class="my-1" block
+                      >Enviar mensaje
+                      <v-icon right dark>mdi-send</v-icon></v-btn
                     >
                   </v-card>
                 </v-col>
                 <v-col>
                   <v-container>
                     <v-row justify="end" align="center">
-                      <v-btn class="my-1" @click="showfilterClientsModal()"
+                      <v-btn
+                        class="my-1"
+                        @click="showfilterClientsModal()"
+                        :disabled="isSingleMessage"
                         ><v-icon dark>mdi-filter</v-icon></v-btn
                       >
                     </v-row>
@@ -298,11 +303,10 @@ export default {
     messageModel: new MessageModel(),
     headerModalMessage: "",
     file: null,
-    showPhoneOnModal: true,
-    
     clients: [],
     filteredClients: [],
     filterClientsModal: false,
+    isSingleMessage: false,
     clientsIds:
       "D01-270782\nD01-098634\nD01-266253\nD01-266253\nD01-266253\nD01-266253\n\n\n",
   }),
@@ -385,7 +389,6 @@ export default {
       );
 
       console.log(this.filteredClients);
-
     },
 
     editItem(item) {
@@ -457,20 +460,20 @@ export default {
       }
     },
 
-    showSingleMessageModal(item) {
-      this.campaignModel.name = item.name;
-      this.campaignModel.id = item.id;
-      this.campaignModel.content = item.content;
+    // showSingleMessageModal(item) {
+    //   this.campaignModel.name = item.name;
+    //   this.campaignModel.id = item.id;
+    //   this.campaignModel.content = item.content;
 
-      this.messageModal = true;
-      //this.showPhoneOnModal = true;
-    },
+    //   this.messageModal = true;
+    //   //this.showPhoneOnModal = true;
+    // },
 
     showMessageModal(item) {
       this.campaignModel.name = item.name;
       this.campaignModel.id = item.id;
       this.campaignModel.content = item.content;
-
+      this.filteredClients = [];
       this.messageModal = true;
       //this.showPhoneOnModal = false;
 
