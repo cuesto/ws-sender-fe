@@ -109,7 +109,7 @@
           </v-btn>
         </template>
       </v-data-table>
-      <v-dialog v-model="messageModal" persistent max-width="1000px">
+      <v-dialog v-model="messageModal" persistent max-width="1200px">
         <v-card class="mx-auto">
           <v-card-title>
             <span class="headline">{{ campaignModel.name }}</span>
@@ -138,7 +138,7 @@
                       hint="8094445555"
                       v-mask="mask"
                       :rules="[rules.required]"
-                      v-model="messageModel.phone"
+                      v-model="phone"
                       single-line
                       :disabled="!isSingleMessage"
                     ></v-text-field>
@@ -176,7 +176,7 @@
                             </v-list-item-content>
                             <v-list-item-action>
                               <v-icon
-                                v-if="item.isSend"
+                                v-if="item.isSent"
                                 small
                                 size="sm"
                                 variant="outline-info"
@@ -199,7 +199,13 @@
                       </template>
                     </v-virtual-scroll>
 
-                    <v-btn dark color="green" class="my-1" block
+                    <v-btn
+                      dark
+                      color="green"
+                      class="my-1"
+                      block
+                      @click="sendMessage()"
+                      :loading="loadingSendBtn"
                       >Enviar mensaje
                       <v-icon right dark>mdi-send</v-icon></v-btn
                     >
@@ -250,12 +256,12 @@
   </v-layout>
 </template>
 <script>
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { firebaseApp } from "../../firebase";
 import {
   getFirestore,
   doc,
-  getDocs,
+  getDoc,
   getDocsFromCache,
   setDoc,
   deleteDoc,
@@ -264,6 +270,7 @@ import {
 import CampaignModel from "../../models/CampaignModel";
 import MessageModel from "../../models/MessageModel";
 import { mask } from "vue-the-mask";
+import axios from "axios";
 //const { phoneNumberFormatter } = require("../../helpers/formatter");
 
 const auth = getAuth();
@@ -300,15 +307,18 @@ export default {
     campaignModel: new CampaignModel(),
     loadingtable: false,
     messageModal: false,
-    messageModel: new MessageModel(),
+    //messageModel: new MessageModel(),
     headerModalMessage: "",
     file: null,
     clients: [],
     filteredClients: [],
     filterClientsModal: false,
     isSingleMessage: false,
-    clientsIds:
-      "D01-270782\nD01-098634\nD01-266253\nD01-266253\nD01-266253\nD01-266253\n\n\n",
+    clientsIds: "D01-096249\nD01-131119\nD01-124077 \nD01-048412",
+    //"D01-270782\nD01-098634\nD01-266253\nD01-266253\nD01-266253\nD01-266253\n\n\nD01-048412\nD01-096249",
+    loadingSendBtn: false,
+    phone: "",
+    url: null,
   }),
   computed: {
     formTitle() {
@@ -327,6 +337,11 @@ export default {
   mounted() {},
   created() {
     //this.getCampaigns();
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        this.getUserData(user.uid);
+      }
+    });
   },
   methods: {
     displayNotification(type, message) {
@@ -337,6 +352,18 @@ export default {
         showConfirmButton: false,
         timer: 1500,
       });
+    },
+
+    async getUserData(uid) {
+      const userRef = doc(db, "profiles", uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        this.url = userSnap.data().server;
+        console.log(this.url)
+      } else {
+        // doc.data() will be undefined in this case
+        console.log("No such document!");
+      }
     },
 
     async getCampaigns() {
@@ -357,7 +384,6 @@ export default {
     },
 
     async getClients() {
-      this.clients = [];
       const querySnapshot = await getDocsFromCache(
         collection(db, "profiles/" + auth.currentUser.uid + "/clients")
       );
@@ -366,6 +392,8 @@ export default {
           id: doc.data().id,
           name: doc.data().name,
           phone: doc.data().phone,
+          isSent: false,
+          hasError: false,
         });
       });
     },
@@ -373,6 +401,7 @@ export default {
     async getClientsByIds() {
       this.filterClientsModal = false;
       let clientsIdsArray;
+      this.clientsIds = this.clientsIds.replace(" ","")
       clientsIdsArray = this.clientsIds.split("\n");
       clientsIdsArray = [...new Set(clientsIdsArray)];
       clientsIdsArray = clientsIdsArray.filter(function (el) {
@@ -381,8 +410,10 @@ export default {
 
       console.log(clientsIdsArray);
 
-      await this.getClients();
-      console.log(this.clients);
+      if (this.clients.length == 0) {
+        await this.getClients();
+        console.log(this.clients);
+      }
 
       this.filteredClients = this.clients.filter((client) =>
         clientsIdsArray.includes(client.id)
@@ -460,14 +491,66 @@ export default {
       }
     },
 
-    // showSingleMessageModal(item) {
-    //   this.campaignModel.name = item.name;
-    //   this.campaignModel.id = item.id;
-    //   this.campaignModel.content = item.content;
+    sendMessage() {
+      this.$swal
+        .fire({
+          title: "¿Está Seguro de enviar este mensaje?",
+          text: "¡No será posible revertir el cambio!",
+          type: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          confirmButtonText: "¡Enviar!",
+          cancelButtonText: "Cancelar",
+        })
+        .then((result) => {
+          if (result.value) {
+            this.sendWSMessage();
+          }
+        });
+    },
 
-    //   this.messageModal = true;
-    //   //this.showPhoneOnModal = true;
-    // },
+    async sendWSMessage() {
+      this.loadingSendBtn = true;
+      let me = this;
+
+      if (this.isSingleMessage) {
+        this.filteredClients = [
+          {
+            id: "",
+            name: "",
+            phone: this.phone,
+            isSent: false,
+            hasError: false,
+          },
+        ];
+      }
+
+      this.filteredClients.forEach((a) => {
+        let message = me.prepareSendWSMessage(a.name);
+        axios
+          .post(me.url + "/send-message", {
+            number: "1" + a.phone,
+            message: message,
+          })
+          .then(function (response) {
+            a.isSent = true;
+          })
+          .catch(function (error) {
+            a.hasError = true;
+            console.log(error);
+          });
+      });
+      setTimeout(() => {
+      this.loadingSendBtn = false;
+      }, 5000);
+      
+    },
+
+    prepareSendWSMessage(name) {
+      let message = this.campaignModel.content;
+      let newMessage = message.replace("{nombre}", name);
+      return newMessage;
+    },
 
     showMessageModal(item) {
       this.campaignModel.name = item.name;
@@ -477,8 +560,8 @@ export default {
       this.messageModal = true;
       //this.showPhoneOnModal = false;
 
-      this.messageModel.message =
-        "¡Hola {nombre}! 👋🏻, Te escribimos de *Domex Herrera*📦 para informarte que tu(s) paquete(s) está(n) disponible(s)🎉.\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio 🚚 *GRATIS* o puede pasarlo a retirar por la sucursal 🙌🏻.";
+      // this.messageModel.message =
+      //   "¡Hola {nombre}! 👋🏻, Te escribimos de *Domex Herrera*📦 para informarte que tu(s) paquete(s) está(n) disponible(s)🎉.\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio 🚚 *GRATIS* o puede pasarlo a retirar por la sucursal 🙌🏻.";
     },
 
     showfilterClientsModal() {
@@ -496,7 +579,7 @@ export default {
     closeMessageModal() {
       this.messageModal = false;
       setTimeout(() => {
-        this.messageModel = Object.assign({}, this.defaultItem);
+        //this.messageModel = Object.assign({}, this.defaultItem);
       }, 300);
     },
 
