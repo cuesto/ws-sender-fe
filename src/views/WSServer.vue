@@ -1,13 +1,13 @@
 <template>
-  <WSServer />
+<WSServer />
 </template>
 
 <script>
 import WSServer from '../components/WSServerComponent';
 
 export default {
-  components: {
-    WSServer,
-  },
+    components: {
+        WSServer,
+    },
 };
 </script>

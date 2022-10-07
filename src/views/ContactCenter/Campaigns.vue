@@ -1,13 +1,13 @@
 <template>
-  <Campaigns />
+<Campaigns />
 </template>
 
 <script>
 import Campaigns from '../../components/ContactCenter/CampaignsComponent.vue';
 
 export default {
-  components: {
-    Campaigns,
-  },
+    components: {
+        Campaigns,
+    },
 };
 </script>
