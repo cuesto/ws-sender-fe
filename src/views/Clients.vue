@@ -1,13 +1,13 @@
 <template>
-  <Clients />
+<Clients />
 </template>
 
 <script>
 import Clients from '../components/ClientsComponent';
 
 export default {
-  components: {
-    Clients,
-  },
+    components: {
+        Clients,
+    },
 };
 </script>

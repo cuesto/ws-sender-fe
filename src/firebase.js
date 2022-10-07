@@ -1,5 +1,5 @@
 import firebase from 'firebase/compat/app';
-import 'firebase/compat/firestore';
+import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 import 'firebase/compat/auth';
 
 const firebaseConfig = {
@@ -15,6 +15,9 @@ const firebaseConfig = {
 
 const firebaseApp = firebase.initializeApp(firebaseConfig);
 const auth = firebaseApp.auth();
+
+const db = getFirestore(firebaseApp);
+enableIndexedDbPersistence(db);
 
 export {
   auth,
