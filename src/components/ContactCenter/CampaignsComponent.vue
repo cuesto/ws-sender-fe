@@ -175,12 +175,10 @@ import {
     collection,
 } from "firebase/firestore";
 import CampaignModel from "../../models/CampaignModel";
-import MessageModel from "../../models/MessageModel";
 import {
     mask
 } from "vue-the-mask";
 import axios from "axios";
-//const { phoneNumberFormatter } = require("../../helpers/formatter");
 
 const auth = getAuth();
 const db = getFirestore(firebaseApp);
@@ -191,38 +189,34 @@ export default {
         mask,
     },
     data: () => ({
-        campaigns: [{
-            id: "CPN001",
-            name: "Notificación Paquetes Disponibles",
-            content: "¡Hola {nombre}! 👋🏻, Te escribimos de *Domex Herrera*📦 para informarte que tu(s) paquete(s) está(n) disponible(s)🎉.\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio 🚚 *GRATIS* o puede pasarlo a retirar por la sucursal 🙌🏻.",
-        }, ],
+        campaigns: [],
         mask: "##########",
         dialog: false,
         headers: [{
                 text: "Opciones",
                 value: "options",
-                sortable: false
+                sortable: false,
             },
             {
                 text: "Id",
                 sortable: true,
-                value: "id"
+                value: "id",
             },
             {
                 text: "Nombre",
                 sortable: true,
-                value: "name"
+                value: "name",
             },
             {
                 text: "Contenido",
                 sortable: false,
-                value: "content"
+                value: "content",
             },
             {
                 text: "Acciones",
                 value: "actions",
                 sortable: false,
-                align: "center"
+                align: "center",
             },
         ],
         rules: {
@@ -233,18 +227,16 @@ export default {
         campaignModel: new CampaignModel(),
         loadingtable: false,
         messageModal: false,
-        //messageModel: new MessageModel(),
         headerModalMessage: "",
         file: null,
         clients: [],
         filteredClients: [],
         filterClientsModal: false,
         isSingleMessage: false,
-        clientsIds: "D01-096249\nD01-131119\nD01-124077 \nD01-048412",
-        //"D01-270782\nD01-098634\nD01-266253\nD01-266253\nD01-266253\nD01-266253\n\n\nD01-048412\nD01-096249",
+        clientsIds: "",
         loadingSendBtn: false,
         phone: "",
-        url: null,
+        url: "",
     }),
     computed: {
         formTitle() {
@@ -254,15 +246,11 @@ export default {
         },
     },
     watch: {
-        dialog(val) {
-            val || this.closeMessageModal();
-            // if (this.$refs.formCampaign != undefined)
-            //   this.$refs.formCampaign.resetValidation();
-        },
+       
     },
     mounted() {},
     created() {
-        //this.getCampaigns();
+        this.getCampaigns();
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 this.getUserData(user.uid);
@@ -285,9 +273,7 @@ export default {
             const userSnap = await getDoc(userRef);
             if (userSnap.exists()) {
                 this.url = userSnap.data().server;
-                console.log(this.url)
             } else {
-                // doc.data() will be undefined in this case
                 console.log("No such document!");
             }
         },
@@ -327,25 +313,21 @@ export default {
         async getClientsByIds() {
             this.filterClientsModal = false;
             let clientsIdsArray;
-            this.clientsIds = this.clientsIds.replace(" ", "")
+            console.log(this.clientsIds)
+            this.clientsIds = this.clientsIds.replaceAll(' ', '');
             clientsIdsArray = this.clientsIds.split("\n");
             clientsIdsArray = [...new Set(clientsIdsArray)];
             clientsIdsArray = clientsIdsArray.filter(function (el) {
                 return el != "";
             });
 
-            console.log(clientsIdsArray);
-
             if (this.clients.length == 0) {
                 await this.getClients();
-                console.log(this.clients);
             }
 
             this.filteredClients = this.clients.filter((client) =>
                 clientsIdsArray.includes(client.id)
             );
-
-            console.log(this.filteredClients);
         },
 
         editItem(item) {
@@ -372,7 +354,7 @@ export default {
                             )
                             .then(() => {
                                 this.close();
-                                //this.getCampaigns();
+                                this.getCampaigns();
                                 this.clean();
                                 this.displayNotification(
                                     "success",
@@ -402,7 +384,7 @@ export default {
                     )
                     .then(() => {
                         this.close();
-                        //this.getCampaigns();
+                        this.getCampaigns();
                         this.clean();
                         this.displayNotification(
                             "success",
@@ -466,7 +448,6 @@ export default {
             setTimeout(() => {
                 this.loadingSendBtn = false;
             }, 5000);
-
         },
 
         prepareSendWSMessage(name) {
@@ -481,10 +462,6 @@ export default {
             this.campaignModel.content = item.content;
             this.filteredClients = [];
             this.messageModal = true;
-            //this.showPhoneOnModal = false;
-
-            // this.messageModel.message =
-            //   "¡Hola {nombre}! 👋🏻, Te escribimos de *Domex Herrera*📦 para informarte que tu(s) paquete(s) está(n) disponible(s)🎉.\n\nPuedes pagar por nuestra web o app para enviarte tu(s) paquete(s) a domicilio 🚚 *GRATIS* o puede pasarlo a retirar por la sucursal 🙌🏻.";
         },
 
         showfilterClientsModal() {
@@ -501,9 +478,6 @@ export default {
 
         closeMessageModal() {
             this.messageModal = false;
-            setTimeout(() => {
-                //this.messageModel = Object.assign({}, this.defaultItem);
-            }, 300);
         },
 
         clean() {

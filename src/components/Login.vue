@@ -68,8 +68,8 @@ const db = getFirestore(firebaseApp);
 export default {
     data: () => ({
         loginForm: {
-            email: "jcuesto@domex.com.do",
-            password: "123456",
+            email: "",//"jcuesto@domex.com.do",
+            password: "",//"123456",
         },
         signupForm: {
             name: "", //"jhon",
@@ -107,10 +107,7 @@ export default {
                 )
                 .then((userCredential) => {
                     // Signed in
-                    const user = userCredential.user;
-                    console.log("Logueado:");
-                    console.log(user);
-                    this.getClients();
+                    this.getProfileData();
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -131,8 +128,6 @@ export default {
                 .then((userCredential) => {
                     // Signed in
                     let registeredUser = userCredential.user;
-                    console.log("registrado:");
-                    console.log(registeredUser);
                     //Registra o perfil
                     setDoc(doc(profilesRef, registeredUser.uid), {
                             name: this.signupForm.name,
@@ -147,10 +142,8 @@ export default {
                                 })
                                 .then(() => {
                                     this.$router.go({
-                                        path: this.$router.path
+                                        path: this.$router.path,
                                     });
-                                    console.log("se actualizó:");
-                                    console.log(registeredUser);
                                 })
                                 .catch(() => console.log);
                         })
@@ -164,18 +157,12 @@ export default {
                 });
         },
 
-        async getClients() {
-            this.clients = [];
-            const querySnapshot = await getDocs(
-                collection(db, "profiles/" + auth.currentUser.uid + "/clients")
+        async getProfileData() {
+            getDocs(collection(db, "profiles/" + auth.currentUser.uid + "/clients"));
+
+            getDocs(
+                collection(db, "profiles/" + auth.currentUser.uid + "/campaigns")
             );
-            querySnapshot.forEach((doc) => {
-                this.clients.push({
-                    id: doc.data().id,
-                    name: doc.data().name,
-                    phone: doc.data().phone,
-                });
-            });
         },
     },
 };

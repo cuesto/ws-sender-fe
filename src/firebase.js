@@ -1,5 +1,4 @@
 import firebase from 'firebase/compat/app';
-//import 'firebase/compat/firestore';
 import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 import 'firebase/compat/auth';
 

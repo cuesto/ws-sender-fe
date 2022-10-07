@@ -135,22 +135,22 @@ export default {
         headers: [{
                 text: "Id",
                 sortable: true,
-                value: "id"
+                value: "id",
             },
             {
                 text: "Nombre",
                 sortable: true,
-                value: "name"
+                value: "name",
             },
             {
                 text: "Celular",
                 sortable: false,
-                value: "phone"
+                value: "phone",
             },
             {
                 text: "Opciones",
                 value: "actions",
-                sortable: false
+                sortable: false,
             },
         ],
         rules: {
@@ -164,7 +164,7 @@ export default {
         uploadModal: false,
         loadingUploadBtn: false,
         disableUploadBtn: false,
-        loadingtable: false
+        loadingtable: false,
     }),
     computed: {
         formTitle() {
@@ -179,7 +179,6 @@ export default {
     },
     mounted() {},
     created() {
-        //this.getClients();
     },
     methods: {
         displayNotification(type, message) {
@@ -302,7 +301,7 @@ export default {
                             )
                             .then(() => {
                                 this.close();
-                                //this.getClients();
+                                this.getClients();
                                 this.clean();
                                 this.displayNotification(
                                     "success",
@@ -329,7 +328,7 @@ export default {
                     )
                     .then(() => {
                         this.close();
-                        //this.getClients();
+                        this.getClients();
                         this.clean();
                         this.displayNotification(
                             "success",
