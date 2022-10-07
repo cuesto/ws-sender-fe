@@ -163,16 +163,16 @@
                 <v-col cols="5">
                   <v-card class="pa-md-4 mx-lg-auto">
                     <v-virtual-scroll
-                      :items="items"
+                      :items="filteredClients"
                       height="345"
                       item-height="55"
                     >
                       <template v-slot:default="{ item }">
                         <v-list>
-                          <v-list-item :key="item">
+                          <v-list-item :key="item.id">
                             <v-list-item-content>
                               <v-list-item-title
-                                v-text="item.text"
+                                v-text="item.id +' - ' + item.name + ' - ' + item.phone"
                               ></v-list-item-title>
                             </v-list-item-content>
                             <v-list-item-action>
@@ -251,6 +251,7 @@ import {
   getFirestore,
   doc,
   getDocs,
+  getDocsFromCache,
   setDoc,
   deleteDoc,
   collection,
@@ -298,45 +299,9 @@ export default {
     headerModalMessage: "",
     file: null,
     showPhoneOnModal: true,
-    items: [
-      { text: "Real-Time", icon: "mdi-clock" },
-      { text: "Audience", icon: "mdi-account" },
-      { text: "Conversions", icon: "mdi-flag" },
-      { text: "Real-Time", icon: "mdi-clock" },
-      { text: "Audience", icon: "mdi-account" },
-      { text: "Conversions", icon: "mdi-flag" },
-      { text: "Real-Time", icon: "mdi-clock" },
-      { text: "Audience", icon: "mdi-account" },
-      { text: "Conversions", icon: "mdi-flag" },
-      { text: "Real-Time", icon: "mdi-clock" },
-      { text: "Audience", icon: "mdi-account" },
-      { text: "Conversions", icon: "mdi-flag" },
-      { text: "Real-Time", icon: "mdi-clock" },
-      { text: "Audience", icon: "mdi-account" },
-      { text: "Conversions", icon: "mdi-flag" },
-      { text: "Real-Time", icon: "mdi-clock" },
-      { text: "Audience", icon: "mdi-account" },
-      { text: "Conversions", icon: "mdi-flag" },
-      { text: "Real-Time", icon: "mdi-clock" },
-      { text: "Audience", icon: "mdi-account" },
-      { text: "Conversions", icon: "mdi-flag" },
-      { text: "Real-Time", icon: "mdi-clock" },
-      { text: "Audience", icon: "mdi-account" },
-      { text: "Conversions", icon: "mdi-flag" },
-      { text: "Real-Time", icon: "mdi-clock" },
-      { text: "Audience", icon: "mdi-account" },
-      { text: "Conversions", icon: "mdi-flag" },
-      { text: "Real-Time", icon: "mdi-clock" },
-      { text: "Audience", icon: "mdi-account" },
-      { text: "Conversions", icon: "mdi-flag" },
-      { text: "Real-Time", icon: "mdi-clock" },
-      { text: "Audience", icon: "mdi-account" },
-      { text: "Conversions", icon: "mdi-flag" },
-      { text: "Real-Time", icon: "mdi-clock" },
-      { text: "Audience", icon: "mdi-account" },
-      { text: "Conversions", icon: "mdi-flag" },
-    ],
+    
     clients: [],
+    filteredClients: [],
     filterClientsModal: false,
     clientsIds:
       "D01-270782\nD01-098634\nD01-266253\nD01-266253\nD01-266253\nD01-266253\n\n\n",
@@ -374,7 +339,7 @@ export default {
       this.loadingtable = true;
       this.campaigns = [];
 
-      const querySnapshot = await getDocs(
+      const querySnapshot = await getDocsFromCache(
         collection(db, "profiles/" + auth.currentUser.uid + "/campaigns")
       );
       querySnapshot.forEach((doc) => {
@@ -388,23 +353,17 @@ export default {
     },
 
     async getClients() {
-      this.clients = [
-        {
-          id: "D01-264423",
-          name: "Shamelis",
-          phone: "8096015222",
-        },
-        {
-          id: "D01-098634",
-          name: "Shamelis",
-          phone: "8096015222",
-        },
-        {
-          id: "D01-266253",
-          name: "Shamelis",
-          phone: "8096015222",
-        },
-      ];
+      this.clients = [];
+      const querySnapshot = await getDocsFromCache(
+        collection(db, "profiles/" + auth.currentUser.uid + "/clients")
+      );
+      querySnapshot.forEach((doc) => {
+        this.clients.push({
+          id: doc.data().id,
+          name: doc.data().name,
+          phone: doc.data().phone,
+        });
+      });
     },
 
     async getClientsByIds() {
@@ -418,24 +377,15 @@ export default {
 
       console.log(clientsIdsArray);
 
-      const querySnapshot = await getDocs(
-        collection(db, "profiles/" + auth.currentUser.uid + "/clients", where('id', 'in', clientsIdsArray))
-      );
-      querySnapshot.forEach((doc) => {
-        this.clients.push({
-          id: doc.data().id,
-          name: doc.data().name,
-          phone: doc.data().phone,
-        });
-      });
-
+      await this.getClients();
       console.log(this.clients);
 
-      // let clients = this.getClients();
-      // //clientsIdsArray.forEach()
-      // //myArray.find(x => x.id === '45').foo;
-      // var a = clients.find(x=>x.id ==="D01-266253");
-      // console.log(a)
+      this.filteredClients = this.clients.filter((client) =>
+        clientsIdsArray.includes(client.id)
+      );
+
+      console.log(this.filteredClients);
+
     },
 
     editItem(item) {
