@@ -1,7 +1,7 @@
 <template>
 <v-layout align-start>
     <v-flex>
-        <v-data-table :headers="headers" :search="search" :items="campaigns" :loading="loadingtable" sort-by="name" class="elevation-1" dense>
+        <v-data-table :headers="headers" :search="search" :items="campaigns" :loading="loadingtable" sort-by="id" class="elevation-1" dense>
             <template v-slot:top>
                 <v-toolbar flat color="white">
                     <v-toolbar-title>Campañas</v-toolbar-title>
@@ -291,7 +291,7 @@ export default {
                     name: doc.data().name,
                     content: doc.data().content,
                 });
-            });
+            });    
             this.loadingtable = false;
         },
 
