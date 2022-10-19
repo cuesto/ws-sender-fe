@@ -143,9 +143,19 @@ export default {
                 value: "name",
             },
             {
+                text: "Apellido",
+                sortable: true,
+                value: "lastName",
+            },
+            {
                 text: "Celular",
                 sortable: false,
                 value: "phone",
+            },
+            {
+                text: "Email",
+                sortable: false,
+                value: "email",
             },
             {
                 text: "Opciones",
@@ -179,6 +189,7 @@ export default {
     },
     mounted() {},
     created() {
+        this.getClients();
     },
     methods: {
         displayNotification(type, message) {
@@ -210,22 +221,27 @@ export default {
                 header: true,
                 complete: function (results) {
                     me.fileProcessed = results.data;
+                    console.log(results.data);
                     customersList = results.data.map((a) => {
                         return {
                             id: a.Id,
                             name: a.Nombre,
+                            lastName: a.Apellido,
                             phone: a.Celular,
+                            email: a.Email,
                         };
                     });
 
                     customersList = customersList.filter(
                         (x) =>
-                        x.id != undefined &&
-                        x.id != "" &&
-                        x.name != undefined &&
-                        x.name != "" &&
-                        x.phone != undefined &&
-                        x.phone != ""
+                        (x.id != undefined &&
+                            x.id != "" &&
+                            x.name != undefined &&
+                            x.name != "" &&
+                            x.phone != undefined &&
+                            x.phone != "") ||
+                        x.lastName != undefined ||
+                        x.lastName != "" && (x.email != undefined && x.email != "")
                     );
 
                     if (customersList.length == 0) {
@@ -241,6 +257,8 @@ export default {
                                 id: a.id,
                                 name: a.name,
                                 phone: phoneNumberFormatter(a.phone),
+                                lastName: a.lastName,
+                                email: a.email,
                             })
                             .then(() => {})
                             .catch((error) => {
@@ -272,6 +290,8 @@ export default {
                     id: doc.data().id,
                     name: doc.data().name,
                     phone: doc.data().phone,
+                    lastName: doc.data().lastName,
+                    email: doc.data().email,
                 });
             });
             this.loadingtable = false;
