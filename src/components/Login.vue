@@ -5,7 +5,7 @@
             <v-col cols="12" sm="8" md="4">
                 <v-card class="elevation-12">
                     <v-toolbar color="primary" dark flat>
-                        <v-toolbar-title>WhatsApp Send Msg</v-toolbar-title>
+                        <v-toolbar-title>Instant Message System</v-toolbar-title>
                         <div class="flex-grow-1"></div>
                     </v-toolbar>
                     <v-card-text>
