@@ -4,13 +4,7 @@
         <v-navigation-drawer v-model="drawer" v-if="isLoggedIn" app>
             <v-list dense nav>
                 <v-list-item-group active-class="blue--text text--accent-3">
-                    <v-list-item :to="{ name: 'home' }">
-                        <v-list-item-icon>
-                            <v-icon>mdi-home</v-icon>
-                        </v-list-item-icon>
-                        <v-list-item-title>Inicio</v-list-item-title>
-                    </v-list-item>
-                    <v-list-item :to="{ name: 'about' }">
+                    <v-list-item :to="{ name: 'dashboard' }">
                         <v-list-item-icon>
                             <v-icon>mdi-view-dashboard</v-icon>
                         </v-list-item-icon>
@@ -28,7 +22,7 @@
                             </v-list-item-icon>
                             <v-list-item-title>Clientes</v-list-item-title>
                         </v-list-item>
-                        <v-list-item :to="{ name: 'about' }">
+                        <v-list-item disabled :to="{ name: 'about' }">
                             <v-list-item-icon>
                                 <v-icon>mdi-account-group</v-icon>
                             </v-list-item-icon>
@@ -41,19 +35,19 @@
                             <v-list-item-title>Campañas</v-list-item-title>
                         </v-list-item>
                     </v-list-group>
-                    <v-list-item>
+                    <v-list-item disabled>
                         <v-list-item-icon>
                             <v-icon>mdi-image-multiple</v-icon>
                         </v-list-item-icon>
                         <v-list-item-title>Galería</v-list-item-title>
                     </v-list-item>
-                    <v-list-item>
+                    <v-list-item disabled>
                         <v-list-item-icon>
                             <v-icon>mdi-chart-bar</v-icon>
                         </v-list-item-icon>
                         <v-list-item-title>Reportes</v-list-item-title>
                     </v-list-item>
-                    <v-list-item>
+                    <v-list-item disabled>
                         <v-list-item-icon>
                             <v-icon>mdi-history</v-icon>
                         </v-list-item-icon>
@@ -71,7 +65,7 @@
                             </v-list-item-icon>
                             <v-list-item-title>Servidor WhatsApp</v-list-item-title>
                         </v-list-item>
-                        <v-list-item>
+                        <v-list-item disabled>
                             <v-list-item-icon>
                                 <v-icon>mdi-account-multiple</v-icon>
                             </v-list-item-icon>

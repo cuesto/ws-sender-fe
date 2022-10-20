@@ -1,11 +1,11 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Login from '../views/Login.vue'
-import Home from '../views/Home.vue'
 import Clients from '../views/Clients.vue'
 import Campaigns from '../views/ContactCenter/Campaigns.vue'
 import WSServer from '../views/WSServer.vue'
 import About from '../views/About.vue'
+import Dashboard from '../views/Dashboard.vue'
 import {
   getAuth,
   onAuthStateChanged,
@@ -23,9 +23,9 @@ const routes = [
     }
   },
   {
-    path: '/home',
-    name: 'home',
-    component: Home,
+    path: '/dashboard',
+    name: 'dashboard',
+    component: Dashboard,
     meta: {
       requiresAuth: true
     }
@@ -82,9 +82,9 @@ router.beforeEach((to, from, next) => {
         // go to login page
         next({
           path: '/',
-          // query: {
-          //   redirect: to.fullPath
-          // }
+          query: {
+            redirect: to.fullPath
+          }
         });
       } else {
         next();
@@ -95,7 +95,7 @@ router.beforeEach((to, from, next) => {
       if (user) {
         // go to home page
         next({
-          path: '/home',
+          path: '/dashboard',
           query: {
             redirect: to.fullPath
           }
