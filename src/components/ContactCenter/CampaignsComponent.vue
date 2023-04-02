@@ -272,7 +272,7 @@ export default {
             const userRef = doc(db, "profiles", uid);
             const userSnap = await getDoc(userRef);
             if (userSnap.exists()) {
-                this.url = userSnap.data().server;
+                this.url = "http://localhost:8000";//userSnap.data().server;
             } else {
                 console.log("No such document!");
             }
