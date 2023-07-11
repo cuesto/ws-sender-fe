@@ -107,6 +107,7 @@ import {
     getFirestore,
     doc,
     getDocsFromCache,
+    getDocs,
     setDoc,
     deleteDoc,
     collection,
@@ -282,7 +283,7 @@ export default {
         async getClients() {
             this.loadingtable = true;
             this.clients = [];
-            const querySnapshot = await getDocsFromCache(
+            const querySnapshot = await getDocs(
                 collection(db, "profiles/" + auth.currentUser.uid + "/clients")
             );
             querySnapshot.forEach((doc) => {
