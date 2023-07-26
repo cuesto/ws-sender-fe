@@ -41,7 +41,7 @@ export default {
             const userRef = doc(db, "profiles", uid);
             const userSnap = await getDoc(userRef);
             if (userSnap.exists()) {
-                this.url = "http://localhost:8000/";//userSnap.data().server;
+                this.url = userSnap.data().server;
                 console.log(this.url);
             } else {
                 // doc.data() will be undefined in this case
