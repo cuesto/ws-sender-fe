@@ -312,12 +312,13 @@ export default {
         },
 
         async getClientsByIds() {
+            
+
             this.filterClientsModal = false;
             let clientsIdsArray;
-            console.log(this.clientsIds)
-            this.clientsIds = this.clientsIds.replaceAll(' ', '');
             clientsIdsArray = this.clientsIds.split("\n");
             clientsIdsArray = [...new Set(clientsIdsArray)];
+            clientsIdsArray = clientsIdsArray.map(x=> x.split(' ')[0]);
             clientsIdsArray = clientsIdsArray.filter(function (el) {
                 return el != "";
             });
