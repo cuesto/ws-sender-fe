@@ -94,17 +94,13 @@
                             <v-col cols="5">
                                 <v-card class="pa-md-4 mx-lg-auto">
                                     <v-virtual-scroll :items="filteredClients" height="410" item-height="55">
-                                        <template v-slot:default="{ item }">
+                                        <template v-slot:default="{ item, index }">
                                             <v-list>
                                                 <v-list-item :key="item.id">
                                                     <v-list-item-content>
-                                                        <v-list-item-title v-text="
-                                  item.id +
-                                  ' - ' +
-                                  item.name +
-                                  ' - ' +
-                                  item.phone
-                                "></v-list-item-title>
+                                                        <v-list-item-title>
+                                                            {{ index + 1 }} - {{ item.id }} - {{ item.name }} - {{ item.phone }}
+                                                        </v-list-item-title>
                                                     </v-list-item-content>
                                                     <v-list-item-action>
                                                         <v-icon v-if="item.isSent" small size="sm" variant="outline-info" color="green" class="mr-1">done</v-icon>
@@ -273,7 +269,8 @@ export default {
             const userRef = doc(db, "profiles", uid);
             const userSnap = await getDoc(userRef);
             if (userSnap.exists()) {
-                this.url = userSnap.data().server;
+                this.url = "http://localhost:8000"//userSnap.data().server;
+                console.log(this.url);
             } else {
                 console.log("No such document!");
             }
