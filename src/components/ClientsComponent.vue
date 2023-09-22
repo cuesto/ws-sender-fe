@@ -225,14 +225,13 @@ export default {
                     console.log(results.data);
                     customersList = results.data.map((a) => {
                         return {
-                            id: a.Id,
-                            name: a.Nombre,
-                            lastName: a.Apellido,
-                            phone: a.Celular,
+                            id: a.Codigo,
+                            name: a.Nombres,
+                            lastName: a.Apellidos,
+                            phone: a.TelCelular,
                             email: a.Email,
                         };
                     });
-
                     customersList = customersList.filter(
                         (x) =>
                         (x.id != undefined &&
@@ -252,7 +251,7 @@ export default {
                         );
                         return;
                     }
-                    console.log(customersList);
+                    
                     customersList.forEach((a) => {
                         setDoc(doc(clientssRef, auth.currentUser.uid, "clients", a.id), {
                                 id: a.id,
