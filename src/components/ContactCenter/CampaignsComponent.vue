@@ -99,7 +99,8 @@
                                                 <v-list-item :key="item.id">
                                                     <v-list-item-content>
                                                         <v-list-item-title>
-                                                            {{ index + 1 }} - {{ item.id }} - {{ item.name }} - {{ item.phone }}
+                                                            {{ index + 1 }} - {{ item.id }} -
+                                                            {{ item.name }} - {{ item.phone }}
                                                         </v-list-item-title>
                                                     </v-list-item-content>
                                                     <v-list-item-action>
@@ -234,6 +235,8 @@ export default {
         loadingSendBtn: false,
         phone: "",
         url: "",
+        uid: null,
+        token: null,
     }),
     computed: {
         formTitle() {
@@ -242,9 +245,7 @@ export default {
                 "Actualizar Plantilla";
         },
     },
-    watch: {
-       
-    },
+    watch: {},
     mounted() {},
     created() {
         this.getCampaigns();
@@ -269,11 +270,27 @@ export default {
             const userRef = doc(db, "profiles", uid);
             const userSnap = await getDoc(userRef);
             if (userSnap.exists()) {
-                this.url = "http://localhost:8000"//userSnap.data().server;
-                console.log(this.url);
+                this.url = userSnap.data().server; //"http://localhost:8000";
+                this.getToken(uid);
             } else {
                 console.log("No such document!");
             }
+        },
+
+        async getToken(uid) {
+            let me = this;
+            console.log(me.url);
+            axios
+                .post(me.url + "/login", {
+                    username: uid,
+                })
+                .then(function (response) {
+                    me.token = response.data.data.token;
+                })
+                .catch(function (error) {
+                    a.hasError = true;
+                    console.log(error);
+                });
         },
 
         async getCampaigns() {
@@ -289,7 +306,7 @@ export default {
                     name: doc.data().name,
                     content: doc.data().content,
                 });
-            });    
+            });
             this.loadingtable = false;
         },
 
@@ -309,13 +326,11 @@ export default {
         },
 
         async getClientsByIds() {
-            
-
             this.filterClientsModal = false;
             let clientsIdsArray;
             clientsIdsArray = this.clientsIds.split("\n");
             clientsIdsArray = [...new Set(clientsIdsArray)];
-            clientsIdsArray = clientsIdsArray.map(x=> x.split(' ')[0]);
+            clientsIdsArray = clientsIdsArray.map((x) => x.split(" ")[0]);
             clientsIdsArray = clientsIdsArray.filter(function (el) {
                 return el != "";
             });
@@ -432,10 +447,16 @@ export default {
             this.filteredClients.forEach((a) => {
                 let message = me.prepareSendWSMessage(a.name);
                 axios
-                    .post(me.url + "/send-message", {
-                        number: "1" + a.phone,
-                        message: message,
-                    })
+                    .post(
+                        me.url + "/send-message", {
+                            number: "1" + a.phone,
+                            message: message,
+                        }, {
+                            headers: {
+                                Authorization: "Bearer " + me.token,
+                            },
+                        }
+                    )
                     .then(function (response) {
                         a.isSent = true;
                     })
